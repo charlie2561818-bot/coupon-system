@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { PlusCircle, Ticket, CheckCircle, Clock } from 'lucide-react';
 import DeleteCouponButton from '@/components/DeleteCouponButton';
+import SecuritySettings from '@/components/SecuritySettings';
 import styles from './admin.module.css';
 
 export default async function AdminDashboard() {
@@ -130,6 +131,9 @@ export default async function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      {/* 帳號安全設定區塊 */}
+      <SecuritySettings />
     </div>
   );
 }

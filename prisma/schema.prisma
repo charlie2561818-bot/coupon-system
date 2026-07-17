@@ -16,9 +16,11 @@ model User {
   username  String   @unique
   password  String
   role      String   @default("STAFF") // "ADMIN" or "STAFF"
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  name             String
+  securityQuestion String?
+  securityAnswer   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   redemptions Redemption[]
 }
