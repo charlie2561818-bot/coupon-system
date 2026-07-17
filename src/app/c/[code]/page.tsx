@@ -155,6 +155,17 @@ export default async function CouponPublicPage({ params }: PageProps) {
           </div>
         </div>
 
+        {coupon.usageRules && (
+          <div style={{ marginTop: '1.5rem', textAlign: 'left' }}>
+            <h3 style={{ fontSize: '1rem', color: 'var(--primary-color)', marginBottom: '0.5rem', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+              使用規則 (Terms & Conditions)
+            </h3>
+            <div style={{ fontSize: '0.9rem', color: '#555', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+              {coupon.usageRules}
+            </div>
+          </div>
+        )}
+
         {canShowQr ? (
           <>
             <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>

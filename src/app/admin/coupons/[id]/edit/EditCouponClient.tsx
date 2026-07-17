@@ -18,6 +18,7 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
   // Form State initialized with existing data
   const [title, setTitle] = useState(coupon.title);
   const [englishTitle, setEnglishTitle] = useState(coupon.englishTitle || '');
+  const [usageRules, setUsageRules] = useState(coupon.usageRules || '');
   const [totalQuantity, setTotalQuantity] = useState(coupon.totalQuantity.toString());
   // Need to format dates to YYYY-MM-DDThh:mm for datetime-local input
   const formatForInput = (isoString: string) => isoString.slice(0, 16);
@@ -44,6 +45,7 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
         body: JSON.stringify({
           title,
           englishTitle,
+          usageRules,
           totalQuantity: parseInt(totalQuantity),
           validFrom: new Date(validFrom).toISOString(),
           validUntil: new Date(validUntil).toISOString(),
@@ -118,6 +120,19 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
                 value={englishTitle}
                 onChange={(e) => setEnglishTitle(e.target.value)}
                 placeholder="例如：Spring New Arrival 10% OFF"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="usageRules">使用規則說明</label>
+              <textarea
+                id="usageRules"
+                className="form-input"
+                value={usageRules}
+                onChange={(e) => setUsageRules(e.target.value)}
+                placeholder="例如：住宿限定假日使用、限購特定商品（選填）"
+                rows={4}
+                style={{ resize: 'vertical' }}
               />
             </div>
 

@@ -15,6 +15,7 @@ export default function NewCouponPage() {
   const [mode, setMode] = useState('MULTI_USE'); // 'SINGLE_USE' or 'MULTI_USE'
   const [title, setTitle] = useState('');
   const [englishTitle, setEnglishTitle] = useState('');
+  const [usageRules, setUsageRules] = useState('');
   const [code, setCode] = useState(''); 
   const [totalQuantity, setTotalQuantity] = useState('100');
   const [validFrom, setValidFrom] = useState('');
@@ -47,6 +48,7 @@ export default function NewCouponPage() {
           mode,
           title,
           englishTitle,
+          usageRules,
           code: mode === 'MULTI_USE' ? code : undefined,
           totalQuantity: parseInt(totalQuantity),
           validFrom: new Date(validFrom).toISOString(),
@@ -129,6 +131,19 @@ export default function NewCouponPage() {
                 value={englishTitle}
                 onChange={(e) => setEnglishTitle(e.target.value)}
                 placeholder="例如：Spring New Arrival 10% OFF"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="usageRules">使用規則說明</label>
+              <textarea
+                id="usageRules"
+                className="form-input"
+                value={usageRules}
+                onChange={(e) => setUsageRules(e.target.value)}
+                placeholder="例如：住宿限定假日使用、限購特定商品（選填）"
+                rows={4}
+                style={{ resize: 'vertical' }}
               />
             </div>
 
