@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  env: {
+    NEXT_PUBLIC_LIFF_ID: '2010743171-k1Xab8vM',
+  },
 };
 
 export default nextConfig;
