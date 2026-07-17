@@ -38,7 +38,7 @@ export default function LoginPage() {
       setError('帳號或密碼錯誤');
       setLoading(false);
     } else {
-      router.push('/admin');
+      router.push('/');
       router.refresh();
     }
   };
