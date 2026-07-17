@@ -2,18 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ticket, LayoutDashboard, LogOut, PlusCircle } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { Ticket, LayoutDashboard, LogOut, PlusCircle, Users, Settings } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = (session?.user as any)?.role || 'STAFF';
 
   const navItems = [
-    { name: '總覽', href: '/admin', icon: LayoutDashboard },
-    { name: '發行優惠券', href: '/admin/coupons/new', icon: PlusCircle },
-    { name: '現場核銷機', href: '/staff', icon: Ticket },
+    { name: '總覽', href: '/admin', icon: LayoutDashboard, roles: ['ADMIN'] },
+    { name: '發行優惠券', href: '/admin/coupons/new', icon: PlusCircle, roles: ['ADMIN'] },
+    { name: '現場核銷機', href: '/staff', icon: Ticket, roles: ['ADMIN', 'STAFF'] },
+    { name: '帳號管理', href: '/admin/users', icon: Users, roles: ['ADMIN'] },
+    { name: '個人設定', href: '/settings', icon: Settings, roles: ['ADMIN', 'STAFF'] },
   ];
+
+  const visibleNavItems = navItems.filter(item => item.roles.includes(role));
 
   return (
     <aside className={styles.sidebar}>
@@ -24,7 +30,7 @@ export default function Sidebar() {
       
       <nav className={styles.nav}>
         <ul className={styles.navList}>
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
             
