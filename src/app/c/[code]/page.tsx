@@ -97,7 +97,7 @@ export default async function CouponPublicPage({ params }: PageProps) {
     statusClass = styles.statusExpired;
     canShowQr = false;
   } else if (coupon.mode === 'SINGLE_USE' && couponCode.redeemedQuantity > 0) {
-    statusText = '已核銷';
+    statusText = '已核銷 (Redeemed)';
     statusClass = styles.statusExpired;
     canShowQr = false;
   }
@@ -201,10 +201,18 @@ export default async function CouponPublicPage({ params }: PageProps) {
             fontWeight: 'bold',
             textAlign: 'center'
           }}>
-            {statusText === '已核銷' || statusText === '活動名額已額滿' ? 
-              `此優惠券${statusText}，無法再被掃描使用。` : 
+            {statusText === '已核銷 (Redeemed)' ? (
+              <>
+                此優惠券已核銷，無法再被掃描使用。<br/>
+                <span style={{ fontSize: '0.85em', fontWeight: 'normal', opacity: 0.9, display: 'inline-block', marginTop: '0.25rem' }}>
+                  (This coupon has already been redeemed and cannot be used again.)
+                </span>
+              </>
+            ) : statusText === '活動名額已額滿' ? (
+              `此優惠券${statusText}，無法再被掃描使用。`
+            ) : (
               `此優惠券目前${statusText}，無法進行掃描核銷。`
-            }
+            )}
           </div>
         )}
       </div>
