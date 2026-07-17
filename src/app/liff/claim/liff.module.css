@@ -1,0 +1,150 @@
+.container {
+  min-height: 100vh;
+  background-color: #faf9f6; /* Washi paper white */
+  color: #2c3e2e; /* Deep matcha green / charcoal */
+  font-family: "Noto Serif TC", "Shippori Mincho", "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(44, 62, 46, 0.05);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #6b8c6a; /* Muted matcha */
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #2c3e2e;
+  letter-spacing: 0.1em;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #7a8b7a;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #e0e5e0;
+  border-top-color: #6b8c6a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorBox {
+  padding: 1.5rem;
+  background: #fff5f5;
+  border-left: 4px solid #d46b6b;
+  color: #a04949;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.successWrapper {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.codeBox {
+  background: #f5f7f5;
+  border: 1px dashed #b5c4b5;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.codeLabel {
+  font-size: 0.8rem;
+  color: #7a8b7a;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+}
+
+.codeValue {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e2e;
+  letter-spacing: 0.15em;
+  font-family: monospace;
+}
+
+.instructions {
+  font-size: 0.9rem;
+  color: #5c6e5c;
+  line-height: 1.6;
+  margin-top: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  width: 100%;
+  padding: 1rem;
+  background: #2c3e2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn:hover {
+  background: #1a251a;
+  transform: translateY(-1px);
+}
+
+.btnOutline {
+  background: transparent;
+  color: #2c3e2e;
+  border: 1px solid #2c3e2e;
+}
+
+.btnOutline:hover {
+  background: #f5f7f5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
