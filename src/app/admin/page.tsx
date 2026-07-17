@@ -7,13 +7,13 @@ import styles from './admin.module.css';
 export default async function AdminDashboard() {
   // Fetch stats and recent coupons
   const totalCoupons = await prisma.coupon.count();
-  const activeCoupons = await prisma.coupon.count({
+  const validCoupons = await prisma.coupon.findMany({
     where: {
       validUntil: { gte: new Date() },
       validFrom: { lte: new Date() },
-      totalQuantity: { gt: prisma.coupon.fields.redeemedQuantity }
     }
   });
+  const activeCoupons = validCoupons.filter(c => c.totalQuantity > c.redeemedQuantity).length;
   
   const coupons = await prisma.coupon.findMany({
     orderBy: { createdAt: 'desc' },
