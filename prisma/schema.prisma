@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String   @default("STAFF") // "ADMIN" or "STAFF"
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  redemptions Redemption[]
+}
+
+model Coupon {
+  id               String   @id @default(uuid())
+  title            String
+  mode             String   @default("MULTI_USE") // "SINGLE_USE" (A模式) or "MULTI_USE" (B模式)
+  totalQuantity    Int      @default(0) // A模式：產生多少張。B模式：這組序號可以用幾次。
+  redeemedQuantity Int      @default(0) // 整個活動總共被核銷了幾次
+  validFrom        DateTime
+  validUntil       DateTime
+  applicableBrand  String   // "源發茶業" / "茶雲居" / "聯合活動"
+  discountType     String   // "FIXED_AMOUNT", "PERCENTAGE", "FREE_GIFT"
+  discountValue    Float
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  status           String   @default("ACTIVE") // "ACTIVE", "PAUSED", "EXPIRED"
+
+  codes            CouponCode[]
+}
+
+model CouponCode {
+  id               String   @id @default(uuid())
+  couponId         String
+  code             String   @unique
+  maxUsage         Int      @default(1) // A模式固定為1，B模式等於表單輸入值
+  redeemedQuantity Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  coupon           Coupon       @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  redemptions      Redemption[]
+
+  @@index([couponId])
+}
+
+model Redemption {
+  id             String     @id @default(uuid())
+  couponCodeId   String
+  staffId        String
+  redeemedAt     DateTime   @default(now())
+
+  couponCode     CouponCode @relation(fields: [couponCodeId], references: [id], onDelete: Cascade)
+  staff          User       @relation(fields: [staffId], references: [id])
+
+  @@index([couponCodeId])
+  @@index([staffId])
+}

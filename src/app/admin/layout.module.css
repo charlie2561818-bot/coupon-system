@@ -1,0 +1,25 @@
+.adminLayoutWrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .adminLayoutWrapper {
+    flex-direction: row;
+  }
+}
+
+.mainContent {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .mainContent {
+    padding: 2rem;
+  }
+}
