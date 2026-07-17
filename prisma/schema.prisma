@@ -48,6 +48,7 @@ model CouponCode {
   maxUsage         Int      @default(1) // A模式固定為1，B模式等於表單輸入值
   redeemedQuantity Int      @default(0)
   isDistributed    Boolean  @default(false)
+  claimedBy        String?  // 記錄領取的 LINE User ID
   createdAt        DateTime @default(now())
 
   coupon           Coupon       @relation(fields: [couponId], references: [id], onDelete: Cascade)
