@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { QrCode, X } from 'lucide-react';
+import { QrCode, X, Check, Send } from 'lucide-react';
 import QRCodeDisplay from './QRCodeDisplay';
 
 interface CouponCode {
@@ -9,6 +9,7 @@ interface CouponCode {
   code: string;
   maxUsage: number;
   redeemedQuantity: number;
+  isDistributed: boolean;
 }
 
 interface CouponCodeTableProps {
@@ -16,14 +17,38 @@ interface CouponCodeTableProps {
   codes: CouponCode[];
 }
 
-export default function CouponCodeTable({ title, codes }: CouponCodeTableProps) {
+export default function CouponCodeTable({ title, codes: initialCodes }: CouponCodeTableProps) {
+  const [codes, setCodes] = useState(initialCodes);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const itemsPerPage = 10;
 
   const totalPages = Math.ceil(codes.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentCodes = codes.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleMarkDistributed = async (id: string) => {
+    try {
+      setIsUpdating(id);
+      const res = await fetch(`/api/codes/${id}/distribute`, {
+        method: 'PATCH',
+      });
+      
+      if (res.ok) {
+        setCodes(prev => prev.map(c => 
+          c.id === id ? { ...c, isDistributed: true } : c
+        ));
+      } else {
+        alert('標記失敗，請稍後再試');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('發生錯誤');
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
   return (
     <div style={{ marginTop: '2rem' }}>
@@ -45,25 +70,48 @@ export default function CouponCodeTable({ title, codes }: CouponCodeTableProps) 
           <tbody>
             {currentCodes.map(c => {
               const isUsedUp = c.redeemedQuantity >= c.maxUsage;
+              const rowStyle = c.isDistributed && !isUsedUp ? { backgroundColor: 'rgba(0, 0, 0, 0.02)' } : {};
+              
               return (
-                <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)', ...rowStyle }}>
                   <td style={{ padding: '1rem' }}><code style={{ backgroundColor: 'var(--bg-color)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{c.code}</code></td>
                   <td style={{ padding: '1rem' }}>{c.maxUsage}</td>
                   <td style={{ padding: '1rem' }}>{c.redeemedQuantity}</td>
                   <td style={{ padding: '1rem' }}>
-                    <span className={`badge ${isUsedUp ? 'badge-warning' : 'badge-success'}`}>
-                      {isUsedUp ? '已使用' : '可使用'}
-                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span className={`badge ${isUsedUp ? 'badge-warning' : 'badge-success'}`}>
+                        {isUsedUp ? '已使用' : '可使用'}
+                      </span>
+                      {c.isDistributed && !isUsedUp && (
+                        <span className="badge badge-secondary" style={{ backgroundColor: '#e2e8f0', color: '#475569' }}>
+                          <Check size={12} style={{ marginRight: '2px' }}/> 已發出
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '1rem' }}>
-                    <button 
-                      className="btn btn-outline" 
-                      onClick={() => setSelectedCode(c.code)}
-                      style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                    >
-                      <QrCode size={16} />
-                      顯示 QR Code
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        className="btn btn-outline" 
+                        onClick={() => setSelectedCode(c.code)}
+                        style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <QrCode size={16} />
+                        顯示 QR Code
+                      </button>
+                      
+                      {!c.isDistributed && !isUsedUp && (
+                        <button 
+                          className="btn btn-primary" 
+                          onClick={() => handleMarkDistributed(c.id)}
+                          disabled={isUpdating === c.id}
+                          style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        >
+                          <Send size={16} />
+                          {isUpdating === c.id ? '處理中...' : '標記為已發出'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
