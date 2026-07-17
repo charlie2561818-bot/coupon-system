@@ -5,6 +5,8 @@ import { Shield, Key, CheckCircle, XCircle } from 'lucide-react';
 import styles from './SecuritySettings.module.css';
 
 const SECURITY_QUESTIONS = [
+  "我畢業的國小是？",
+  "我最喜歡的食物是？",
   "我的第一台電動車型號是？",
   "我最常玩的飛行模擬遊戲是？",
   "我最喜歡的棒球脫口秀節目是？",
