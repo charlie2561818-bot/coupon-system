@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { mode, code, title, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue } = body;
+    const { mode, code, title, englishTitle, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue } = body;
 
     const generateCode = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -62,6 +62,7 @@ export async function POST(request: Request) {
       data: {
         mode,
         title,
+        englishTitle,
         totalQuantity, // For A, it's count of codes. For B, it's max uses.
         validFrom: new Date(validFrom),
         validUntil: new Date(validUntil),

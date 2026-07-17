@@ -28,6 +28,7 @@ model User {
 model Coupon {
   id               String   @id @default(uuid())
   title            String
+  englishTitle     String?
   mode             String   @default("MULTI_USE") // "SINGLE_USE" (A模式) or "MULTI_USE" (B模式)
   totalQuantity    Int      @default(0) // A模式：產生多少張。B模式：這組序號可以用幾次。
   redeemedQuantity Int      @default(0) // 整個活動總共被核銷了幾次

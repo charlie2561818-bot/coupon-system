@@ -64,7 +64,7 @@ export async function PUT(
     const { id } = resolvedParams;
     
     const body = await request.json();
-    const { title, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue } = body;
+    const { title, englishTitle, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue } = body;
 
     const existingCoupon = await prisma.coupon.findUnique({
       where: { id },
@@ -80,6 +80,7 @@ export async function PUT(
       where: { id },
       data: {
         title,
+        englishTitle,
         validFrom: new Date(validFrom),
         validUntil: new Date(validUntil),
         applicableBrand,

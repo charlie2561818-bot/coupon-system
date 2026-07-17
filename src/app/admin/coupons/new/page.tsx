@@ -14,6 +14,7 @@ export default function NewCouponPage() {
   // Form State
   const [mode, setMode] = useState('MULTI_USE'); // 'SINGLE_USE' or 'MULTI_USE'
   const [title, setTitle] = useState('');
+  const [englishTitle, setEnglishTitle] = useState('');
   const [code, setCode] = useState(''); 
   const [totalQuantity, setTotalQuantity] = useState('100');
   const [validFrom, setValidFrom] = useState('');
@@ -45,6 +46,7 @@ export default function NewCouponPage() {
         body: JSON.stringify({
           mode,
           title,
+          englishTitle,
           code: mode === 'MULTI_USE' ? code : undefined,
           totalQuantity: parseInt(totalQuantity),
           validFrom: new Date(validFrom).toISOString(),
@@ -115,6 +117,18 @@ export default function NewCouponPage() {
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 placeholder="例如：春季新品上市 9 折券"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="englishTitle">英文活動/優惠券名稱 (English Name)</label>
+              <input
+                id="englishTitle"
+                type="text"
+                className="form-input"
+                value={englishTitle}
+                onChange={(e) => setEnglishTitle(e.target.value)}
+                placeholder="例如：Spring New Arrival 10% OFF"
               />
             </div>
 

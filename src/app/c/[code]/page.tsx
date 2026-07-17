@@ -119,6 +119,18 @@ export default async function CouponPublicPage({ params }: PageProps) {
         
         <div className={styles.brandName}>{coupon.applicableBrand}</div>
         <h1 className={styles.couponTitle}>{coupon.title}</h1>
+        {coupon.englishTitle && (
+          <h2 className={styles.couponEnglishTitle} style={{ 
+            fontSize: '1rem', 
+            color: '#666', 
+            textAlign: 'center', 
+            marginTop: '-0.5rem', 
+            marginBottom: '1rem', 
+            fontWeight: 'normal' 
+          }}>
+            {coupon.englishTitle}
+          </h2>
+        )}
         
         <div className={styles.discountBadge}>
           {formatDiscount(coupon.discountType, coupon.discountValue)}

@@ -17,6 +17,7 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
 
   // Form State initialized with existing data
   const [title, setTitle] = useState(coupon.title);
+  const [englishTitle, setEnglishTitle] = useState(coupon.englishTitle || '');
   const [totalQuantity, setTotalQuantity] = useState(coupon.totalQuantity.toString());
   // Need to format dates to YYYY-MM-DDThh:mm for datetime-local input
   const formatForInput = (isoString: string) => isoString.slice(0, 16);
@@ -42,6 +43,7 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
         },
         body: JSON.stringify({
           title,
+          englishTitle,
           totalQuantity: parseInt(totalQuantity),
           validFrom: new Date(validFrom).toISOString(),
           validUntil: new Date(validUntil).toISOString(),
@@ -104,6 +106,18 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 placeholder="例如：春季新品上市 9 折券"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="englishTitle">英文活動/優惠券名稱 (English Name)</label>
+              <input
+                id="englishTitle"
+                type="text"
+                className="form-input"
+                value={englishTitle}
+                onChange={(e) => setEnglishTitle(e.target.value)}
+                placeholder="例如：Spring New Arrival 10% OFF"
               />
             </div>
 
