@@ -76,7 +76,7 @@ export default async function CouponPublicPage({ params }: PageProps) {
   const brandClass = getBrandClass(coupon.applicableBrand);
   
   const now = new Date();
-  let statusText = '可使用';
+  let statusText = '可使用 (Valid)';
   let statusClass = styles.statusActive;
   let canShowQr = true;
 
@@ -128,15 +128,15 @@ export default async function CouponPublicPage({ params }: PageProps) {
 
         <div className={styles.detailsSection}>
           <div className={styles.detailRow}>
-            <span className={styles.detailLabel}><Tag size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} /> 優惠代碼</span>
+            <span className={styles.detailLabel}><Tag size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} /> 優惠代碼 (Promo Code)</span>
             <span className={styles.detailValue}>{couponCode.code}</span>
           </div>
           <div className={styles.detailRow}>
-            <span className={styles.detailLabel}><Calendar size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} /> 狀態</span>
+            <span className={styles.detailLabel}><Calendar size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} /> 狀態 (Status)</span>
             <span className={`${styles.detailValue} ${statusClass}`}>{statusText}</span>
           </div>
           <div className={styles.detailRow} style={{ marginTop: '0.75rem', flexDirection: 'column', gap: '0.25rem' }}>
-            <span className={styles.detailLabel}>有效期限</span>
+            <span className={styles.detailLabel}>有效期限 (Valid Until)</span>
             <span className={styles.detailValue} style={{ fontSize: '0.85rem' }}>
               {validFromStr} <br/>至 {validUntilStr}
             </span>
@@ -145,9 +145,13 @@ export default async function CouponPublicPage({ params }: PageProps) {
 
         {canShowQr ? (
           <>
-            <div className={styles.instructions}>
-              本優惠券僅供現場人員核銷使用。<br/>
-              請於結帳時向服務人員出示此畫面。
+            <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>本優惠適用於現場結帳與線上客服（LINE/FB/IG）。</strong><br/>
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Valid for in-store and online messages (LINE/FB/IG).)</span><br/><br/>
+              <strong>現場結帳：</strong>請於結帳時向服務人員出示此畫面。<br/>
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(In-store: Please present this screen to our staff at checkout.)</span><br/><br/>
+              <strong>線上客服：</strong>請截圖此畫面或提供上方的『優惠代碼』傳送給我們。<br/>
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Online: Please send a screenshot of this page or the Promo Code to us via message.)</span>
             </div>
 
             <div style={{
@@ -162,7 +166,10 @@ export default async function CouponPublicPage({ params }: PageProps) {
               width: '100%',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             }}>
-              <h3 style={{ margin: 0, color: '#333', fontSize: '1.1rem', fontWeight: 'bold' }}>請出示給店員掃描</h3>
+              <h3 style={{ margin: 0, color: '#333', fontSize: '1.1rem', fontWeight: 'bold', textAlign: 'center' }}>
+                門市核銷請出示以下條碼<br/>
+                <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#666' }}>Please present this QR code for in-store redemption.</span>
+              </h3>
               
               <InlineQRCode code={couponCode.code} />
               
