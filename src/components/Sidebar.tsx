@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ticket, LayoutDashboard, LogOut, PlusCircle, Users, Settings } from 'lucide-react';
+import { Ticket, LayoutDashboard, LogOut, PlusCircle, Users, Settings, Gift } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import styles from './Sidebar.module.css';
 
@@ -15,6 +15,7 @@ export default function Sidebar() {
     { name: '總覽', href: '/admin', icon: LayoutDashboard, roles: ['ADMIN'] },
     { name: '發行優惠券', href: '/admin/coupons/new', icon: PlusCircle, roles: ['ADMIN'] },
     { name: '現場核銷機', href: '/staff', icon: Ticket, roles: ['ADMIN', 'STAFF'] },
+    { name: '櫃檯盲盒機', href: '/blindbox', icon: Gift, roles: ['ADMIN', 'STAFF'] },
     { name: '帳號管理', href: '/admin/users', icon: Users, roles: ['ADMIN'] },
     { name: '個人設定', href: '/settings', icon: Settings, roles: ['ADMIN', 'STAFF'] },
   ];
