@@ -53,10 +53,17 @@ export default function BlindboxPage() {
 
       {phase === 'IDLE' && (
         <div className={styles.idleWrapper}>
-          <h1 className={styles.title}>🎁 隱藏盲盒抽獎</h1>
-          <p style={{ fontSize: '1.2rem', color: '#666' }}>試試手氣，看看今天老闆準備了什麼驚喜！</p>
+          <h1 className={styles.title} style={{ textAlign: 'center' }}>
+            🎁 隱藏盲盒抽獎
+            <span style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'normal', marginTop: '0.5rem', opacity: 0.8 }}>Mystery Blind Box</span>
+          </h1>
+          <p style={{ fontSize: '1.2rem', color: '#666', textAlign: 'center', lineHeight: '1.6' }}>
+            試試手氣，看看今天老闆準備了什麼驚喜！<br/>
+            <span style={{ fontSize: '1rem', opacity: 0.8 }}>(Test your luck and see what surprise the boss prepared today!)</span>
+          </p>
           <button className={styles.drawBtn} onClick={handleStartDraw}>
-            馬上開抽！
+            <div style={{ fontWeight: 'bold' }}>馬上開抽！</div>
+            <div style={{ fontSize: '1rem', fontWeight: 'normal', opacity: 0.9 }}>(Draw Now!)</div>
           </button>
         </div>
       )}
@@ -69,19 +76,8 @@ export default function BlindboxPage() {
             autoPlay 
             playsInline 
             muted 
-            style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
           />
-          
-          {/* 如果影片還沒放進去，或是載入失敗，就會顯示這個預設備用畫面 */}
-          <div className={styles.videoPlaceholder} style={{ position: 'relative', zIndex: 0 }}>
-            <h2>☕️ 老闆正在喝熱茶...</h2>
-            <p style={{ opacity: 0.8 }}>(請將您的影片命名為 blindbox-animation.mp4 並放入 public 資料夾中)</p>
-            <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-              <span style={{ fontSize: '2rem', animation: 'shakeText 0.3s infinite' }}>🔥</span>
-              <span style={{ fontSize: '2rem', animation: 'shakeText 0.4s infinite' }}>💦</span>
-              <span style={{ fontSize: '2rem', animation: 'shakeText 0.5s infinite' }}>💥</span>
-            </div>
-          </div>
         </div>
       )}
 
@@ -89,8 +85,8 @@ export default function BlindboxPage() {
         <div className={styles.resultContainer}>
           {result && result.success ? (
             <>
-              <h2 className={styles.prizeTitle}>🎉 恭喜中獎！</h2>
-              <p className={styles.prizeSubtitle}>您獲得了：</p>
+              <h2 className={styles.prizeTitle}>🎉 恭喜中獎！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Congratulations!)</span></h2>
+              <p className={styles.prizeSubtitle}>您獲得了 (You won)：</p>
               
               <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.8rem', color: '#2c3e2e', margin: '0 0 0.5rem 0' }}>{result.couponTitle}</h3>
@@ -109,14 +105,19 @@ export default function BlindboxPage() {
               </div>
 
               <div className={styles.codeBox}>
-                <div className={styles.codeLabel}>專屬序號</div>
+                <div className={styles.codeLabel}>專屬序號 (Promo Code)</div>
                 <div className={styles.codeValue}>{result.code}</div>
+              </div>
+              
+              <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568' }}>
+                <strong>兌換說明：</strong>{result.message}<br/>
+                <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
               </div>
             </>
           ) : (
             <>
-              <h2 className={styles.prizeTitle} style={{ color: '#ef4444' }}>😅 哎呀！</h2>
-              <p className={styles.prizeSubtitle}>{result?.message || '抽獎失敗，請稍後再試。'}</p>
+              <h2 className={styles.prizeTitle} style={{ color: '#ef4444' }}>😅 哎呀！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Oops!)</span></h2>
+              <p className={styles.prizeSubtitle}>{result?.message || '抽獎失敗，請稍後再試。 (Draw failed, please try again later.)'}</p>
             </>
           )}
 
@@ -134,7 +135,7 @@ export default function BlindboxPage() {
               transition: 'background 0.2s'
             }}
           >
-            完成 / 換下一位
+            完成 / 換下一位<br/><span style={{fontSize:'0.85rem'}}>(Finish / Next)</span>
           </button>
         </div>
       )}
