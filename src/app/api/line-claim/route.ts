@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       where: {
         couponId: activeCampaign.id,
         isDistributed: false,
+        redeemedQuantity: 0,
         claimedBy: null
       }
     });
