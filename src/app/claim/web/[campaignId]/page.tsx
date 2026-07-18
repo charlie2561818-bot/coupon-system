@@ -21,7 +21,8 @@ export default function WebClaimPage() {
   const campaignId = params.campaignId as string;
 
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isClaiming, setIsClaiming] = useState(false);
+  const [phase, setPhase] = useState<'IDLE' | 'PLAYING' | 'REVEAL'>('IDLE');
+  const [showFlash, setShowFlash] = useState(false);
   const [result, setResult] = useState<ClaimResult | null>(null);
   const [qrValue, setQrValue] = useState('');
   
@@ -44,44 +45,78 @@ export default function WebClaimPage() {
   }, [campaignId]);
 
   const claimCoupon = async () => {
-    setIsClaiming(true);
-    try {
-      const res = await fetch(`/api/claim/web/${campaignId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    setPhase('PLAYING');
+    
+    fetch(`/api/claim/web/${campaignId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setResult(data);
+        if (data.campaignId) {
+          localStorage.setItem(`hasDrawn_${campaignId}`, 'true');
+          // setHasDrawn is used for checking BEFORE they draw. We shouldn't block the current reveal.
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setResult({ success: false, message: '網路連線異常，請稍後再試。' });
       });
-      
-      const data = await res.json();
-      setResult(data);
-      
-      if (res.ok) {
-        localStorage.setItem(`hasDrawn_${campaignId}`, 'true');
-        setHasDrawn(true);
-      }
-    } catch (err) {
-      console.error(err);
-      setResult({ success: false, message: '網路連線異常，請稍後再試。' });
-    } finally {
-      setIsClaiming(false);
-    }
+
+    setTimeout(() => {
+      setShowFlash(true);
+      setPhase('REVEAL');
+      setTimeout(() => setShowFlash(false), 500);
+    }, 10000);
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>專屬優惠抽獎</h1>
-        <p className={styles.subtitle}>幸運輪盤，試試手氣！</p>
-
-        {isInitializing || isClaiming ? (
-          <div className={styles.loadingWrapper}>
-            <div className={styles.spinner}></div>
-            <p className={styles.instructions}>
-              {isInitializing ? '正在準備抽獎系統...' : '正在為您開獎...'}
-            </p>
+        {showFlash && <div className={styles.shatterFlash}></div>}
+        
+        {phase === 'PLAYING' ? (
+          <div className={styles.videoContainer}>
+            <video 
+              src="/blindbox-animation.mp4" 
+              autoPlay 
+              playsInline 
+              style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
+            />
           </div>
-        ) : result ? (
+        ) : phase === 'IDLE' ? (
           <div className={styles.successWrapper}>
-            {result.success ? (
+            <h1 className={styles.title}>專屬優惠抽獎</h1>
+            <p className={styles.subtitle}>幸運輪盤，試試手氣！</p>
+            
+            {isInitializing ? (
+              <div className={styles.loadingWrapper}>
+                <div className={styles.spinner}></div>
+                <p className={styles.instructions}>正在準備抽獎系統...</p>
+              </div>
+            ) : hasDrawn ? (
+              <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
+                <p>您已經抽過囉！把機會留給別人吧！<br/>(You have already played. Please leave the chance to others!)</p>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！<br/>(Click the button below to test your luck!)</p>
+                <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem' }}>
+                  🎁 抽獎去！ (Draw Now!)
+                </button>
+              </>
+            )}
+            
+            <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
+              本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
+              We reserve the right to modify, interpret, or cancel this promotion at any time.
+            </div>
+          </div>
+        ) : (
+          <div className={styles.successWrapper}>
+            <h1 className={styles.title} style={{ marginTop: '1rem' }}>抽獎結果</h1>
+            {result?.success ? (
               result.won ? (
                 <>
                   <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
@@ -96,7 +131,7 @@ export default function WebClaimPage() {
                   )}
 
                   {qrValue && (
-                    <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                    <div className={styles.qrWrapper}>
                       <QRCodeCanvas 
                         value={qrValue}
                         size={200}
@@ -109,7 +144,7 @@ export default function WebClaimPage() {
                   )}
                   
                   <div className={styles.codeBox}>
-                    <div className={styles.codeLabel}>專屬序號</div>
+                    <div className={styles.codeLabel}>專屬序號 (Promo Code)</div>
                     <div className={styles.codeValue}>{result.code}</div>
                   </div>
                   
@@ -133,7 +168,7 @@ export default function WebClaimPage() {
               )
             ) : (
               <div className={styles.errorBox} style={{ borderLeftColor: '#ef4444', background: '#fef2f2', color: '#b91c1c' }}>
-                <p>{result.message}</p>
+                <p>{result?.message || '網路連線異常，請稍後再試。'}</p>
               </div>
             )}
 
@@ -142,26 +177,6 @@ export default function WebClaimPage() {
               We reserve the right to modify, interpret, or cancel this promotion at any time.
             </div>
             
-          </div>
-        ) : (
-          <div className={styles.successWrapper}>
-            {hasDrawn ? (
-              <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
-                <p>您已經抽過囉！把機會留給別人吧！<br/>(You have already played. Please leave the chance to others!)</p>
-              </div>
-            ) : (
-              <>
-                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！<br/>(Click the button below to test your luck!)</p>
-                <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem' }}>
-                  🎁 抽獎去！ (Draw Now!)
-                </button>
-              </>
-            )}
-            
-            <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
-              本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
-              We reserve the right to modify, interpret, or cancel this promotion at any time.
-            </div>
           </div>
         )}
       </div>
