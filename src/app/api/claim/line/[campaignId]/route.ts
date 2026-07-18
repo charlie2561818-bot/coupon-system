@@ -37,6 +37,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         alreadyClaimed: true,
         won: true,
         code: existingCode.code,
+        couponTitle: campaign.title,
+        couponEnglishTitle: campaign.englishTitle,
         message: '您已經領取過此活動的專屬序號囉！'
       });
     }
@@ -85,6 +87,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       won: true,
       alreadyClaimed: false,
       code: updatedCode.code,
+      couponTitle: campaign.title,
+      couponEnglishTitle: campaign.englishTitle,
       message: `嗨 ${displayName || '好友'}，恭喜中獎！這是您的專屬優惠碼！`
     });
 

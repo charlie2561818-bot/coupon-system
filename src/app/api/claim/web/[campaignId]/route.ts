@@ -59,6 +59,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       success: true,
       won: true,
       code: updatedCode.code,
+      couponTitle: campaign.title,
+      couponEnglishTitle: campaign.englishTitle,
       message: `恭喜中獎！這是您的專屬優惠碼！`
     });
 

@@ -8,6 +8,8 @@ interface ClaimResult {
   success: boolean;
   won?: boolean;
   code?: string;
+  couponTitle?: string;
+  couponEnglishTitle?: string;
   message?: string;
   campaignId?: string;
   alreadyClaimed?: boolean;
@@ -140,6 +142,15 @@ export default function LiffClaimPage() {
                     <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
                   )}
                   
+                  {result.couponTitle && (
+                    <div style={{ textAlign: 'center', margin: '0 0 1rem 0' }}>
+                      <h2 style={{ margin: '0 0 0.25rem 0', color: '#2c3e2e', fontSize: '1.3rem' }}>{result.couponTitle}</h2>
+                      {result.couponEnglishTitle && (
+                        <h3 style={{ margin: 0, color: '#666', fontSize: '1rem', fontWeight: 'normal' }}>{result.couponEnglishTitle}</h3>
+                      )}
+                    </div>
+                  )}
+
                   {qrValue && (
                     <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                       <QRCodeCanvas 
