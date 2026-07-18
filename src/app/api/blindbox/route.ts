@@ -34,13 +34,23 @@ export async function POST() {
       });
     }
 
-    // 3. 從可用的活動清單中「平均隨機」挑選一個
+    // 3. 加入 30% 中獎率判定
+    const WIN_RATE = 0.3;
+    if (Math.random() > WIN_RATE) {
+      return NextResponse.json({
+        success: true,
+        won: false,
+        message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
+      });
+    }
+
+    // 4. 若中獎，從可用的活動清單中「平均隨機」挑選一個
     // (未來如果需要加入機率權重，可修改此處的挑選邏輯)
     const randomIndex = Math.floor(Math.random() * availableCampaigns.length);
     const selectedCampaign = availableCampaigns[randomIndex];
     const selectedCode = selectedCampaign.codes[0];
 
-    // 4. 使用 Transaction 將該序號標記為已派發
+    // 5. 使用 Transaction 將該序號標記為已派發
     await prisma.$transaction([
       prisma.couponCode.update({
         where: { id: selectedCode.id },
@@ -49,7 +59,7 @@ export async function POST() {
       // 注意：這裡先不增加 redeemedQuantity，那是核銷時才加的。
     ]);
 
-    // 5. 回傳抽中資訊
+    // 6. 回傳抽中資訊
     return NextResponse.json({
       success: true,
       won: true,

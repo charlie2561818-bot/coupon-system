@@ -84,36 +84,43 @@ export default function BlindboxPage() {
       {phase === 'REVEAL' && (
         <div className={styles.resultContainer}>
           {result && result.success ? (
-            <>
-              <h2 className={styles.prizeTitle}>🎉 恭喜中獎！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Congratulations!)</span></h2>
-              <p className={styles.prizeSubtitle}>您獲得了 (You won)：</p>
-              
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.8rem', color: '#2c3e2e', margin: '0 0 0.5rem 0' }}>{result.couponTitle}</h3>
-                <div style={{ color: '#666', fontSize: '1.1rem' }}>{result.couponEnglishTitle}</div>
-              </div>
+            result.won ? (
+              <>
+                <h2 className={styles.prizeTitle}>🎉 恭喜中獎！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Congratulations!)</span></h2>
+                <p className={styles.prizeSubtitle}>您獲得了 (You won)：</p>
+                
+                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.8rem', color: '#2c3e2e', margin: '0 0 0.5rem 0' }}>{result.couponTitle}</h3>
+                  <div style={{ color: '#666', fontSize: '1.1rem' }}>{result.couponEnglishTitle}</div>
+                </div>
 
-              <div className={styles.qrWrapper}>
-                <QRCodeCanvas 
-                  value={qrValue}
-                  size={220}
-                  level={"H"}
-                  includeMargin={true}
-                  bgColor={"#ffffff"}
-                  fgColor={"#2c3e2e"}
-                />
-              </div>
+                <div className={styles.qrWrapper}>
+                  <QRCodeCanvas 
+                    value={qrValue}
+                    size={220}
+                    level={"H"}
+                    includeMargin={true}
+                    bgColor={"#ffffff"}
+                    fgColor={"#2c3e2e"}
+                  />
+                </div>
 
-              <div className={styles.codeBox}>
-                <div className={styles.codeLabel}>專屬序號 (Promo Code)</div>
-                <div className={styles.codeValue}>{result.code}</div>
+                <div className={styles.codeBox}>
+                  <div className={styles.codeLabel}>專屬序號 (Promo Code)</div>
+                  <div className={styles.codeValue}>{result.code}</div>
+                </div>
+                
+                <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568' }}>
+                  <strong>兌換說明：</strong>{result.message}<br/>
+                  <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                <h2 className={styles.prizeTitle} style={{ color: '#5c6e5c' }}>未中獎<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Not a Winner)</span></h2>
+                <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{result.message}</p>
               </div>
-              
-              <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568' }}>
-                <strong>兌換說明：</strong>{result.message}<br/>
-                <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
-              </div>
-            </>
+            )
           ) : (
             <>
               <h2 className={styles.prizeTitle} style={{ color: '#ef4444' }}>😅 哎呀！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Oops!)</span></h2>
