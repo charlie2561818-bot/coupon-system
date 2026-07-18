@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
-import styles from './liff.module.css';
+import { useParams } from 'next/navigation';
+// Using the same styles as LIFF for consistency
+import styles from '@/app/liff/claim/liff.module.css';
 
 interface ClaimResult {
   success: boolean;
@@ -10,18 +12,17 @@ interface ClaimResult {
   code?: string;
   message?: string;
   campaignId?: string;
-  alreadyClaimed?: boolean;
 }
 
-export default function LiffClaimPage() {
-  const [liffError, setLiffError] = useState<string | null>(null);
+export default function WebClaimPage() {
+  const params = useParams();
+  const campaignId = params.campaignId as string;
+
   const [isInitializing, setIsInitializing] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
   const [result, setResult] = useState<ClaimResult | null>(null);
   const [qrValue, setQrValue] = useState('');
   
-  const [profile, setProfile] = useState<{ userId: string, displayName: string } | null>(null);
-  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
   const [hasDrawn, setHasDrawn] = useState(false);
 
   useEffect(() => {
@@ -31,67 +32,28 @@ export default function LiffClaimPage() {
   }, [result?.code]);
 
   useEffect(() => {
-    // 由於 liff 是 client-side library，必須在 useEffect 中載入與執行
-    const initLiff = async () => {
-      try {
-        const liff = (await import('@line/liff')).default;
-        
-        const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
-        if (!liffId) {
-          throw new Error('請在 Vercel 環境變數中設定 NEXT_PUBLIC_LIFF_ID');
-        }
-
-        await liff.init({ liffId });
-
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
-
-        const userProfile = await liff.getProfile();
-        setProfile({ userId: userProfile.userId, displayName: userProfile.displayName });
-        
-        // 檢查是否有進行中的活動
-        const res = await fetch('/api/claim/active');
-        const data = await res.json();
-        
-        if (data.success && data.campaignId) {
-          setActiveCampaignId(data.campaignId);
-          // 檢查 LocalStorage 是否已經抽過
-          const drawn = localStorage.getItem(`hasDrawn_${data.campaignId}`);
-          if (drawn === 'true') {
-            setHasDrawn(true);
-          }
-        } else {
-          setLiffError(data.message || '目前沒有進行中的活動');
-        }
-      } catch (err: any) {
-        console.error('LIFF 初始化失敗:', err);
-        setLiffError(err.message || '初始化失敗，請在 LINE App 中開啟此連結。');
-      } finally {
-        setIsInitializing(false);
+    if (typeof window !== 'undefined') {
+      const drawn = localStorage.getItem(`hasDrawn_${campaignId}`);
+      if (drawn === 'true') {
+        setHasDrawn(true);
       }
-    };
-
-    initLiff();
-  }, []);
+      setIsInitializing(false);
+    }
+  }, [campaignId]);
 
   const claimCoupon = async () => {
-    if (!profile || !activeCampaignId) return;
-    
     setIsClaiming(true);
     try {
-      const res = await fetch(`/api/claim/line/${activeCampaignId}`, {
+      const res = await fetch(`/api/claim/web/${campaignId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName })
       });
       
       const data = await res.json();
       setResult(data);
       
-      if (data.campaignId) {
-        localStorage.setItem(`hasDrawn_${data.campaignId}`, 'true');
+      if (res.ok) {
+        localStorage.setItem(`hasDrawn_${campaignId}`, 'true');
         setHasDrawn(true);
       }
     } catch (err) {
@@ -102,20 +64,11 @@ export default function LiffClaimPage() {
     }
   };
 
-  const handleClose = async () => {
-    const liff = (await import('@line/liff')).default;
-    if (liff.isInClient()) {
-      liff.closeWindow();
-    } else {
-      window.close();
-    }
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>專屬優惠抽獎</h1>
-        <p className={styles.subtitle}>LINE 官方帳號會員限定</p>
+        <p className={styles.subtitle}>幸運輪盤，試試手氣！</p>
 
         {isInitializing || isClaiming ? (
           <div className={styles.loadingWrapper}>
@@ -124,21 +77,12 @@ export default function LiffClaimPage() {
               {isInitializing ? '正在準備抽獎系統...' : '正在為您開獎...'}
             </p>
           </div>
-        ) : liffError ? (
-          <div className={styles.errorBox}>
-            <strong>活動提示</strong>
-            <p style={{ marginTop: '0.5rem' }}>{liffError}</p>
-          </div>
         ) : result ? (
           <div className={styles.successWrapper}>
             {result.success ? (
               result.won ? (
                 <>
-                  {result.alreadyClaimed ? (
-                    <p style={{ color: '#7a8b7a', marginBottom: '1rem' }}>您已經領取過此優惠囉！</p>
-                  ) : (
-                    <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
-                  )}
+                  <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
                   
                   {qrValue && (
                     <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
@@ -187,21 +131,18 @@ export default function LiffClaimPage() {
               We reserve the right to modify, interpret, or cancel this promotion at any time.
             </div>
             
-            <button className={styles.btn} onClick={handleClose}>
-              關閉畫面
-            </button>
           </div>
         ) : (
           <div className={styles.successWrapper}>
             {hasDrawn ? (
               <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
-                <p>您已經抽過囉！把機會留給別人吧！</p>
+                <p>您已經抽過囉！把機會留給別人吧！<br/>(You have already played. Please leave the chance to others!)</p>
               </div>
             ) : (
               <>
-                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！</p>
+                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！<br/>(Click the button below to test your luck!)</p>
                 <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem' }}>
-                  🎁 抽獎去！
+                  🎁 抽獎去！ (Draw Now!)
                 </button>
               </>
             )}

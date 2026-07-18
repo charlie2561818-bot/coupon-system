@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, Tag, CheckCircle2, Ticket, Percent, Edit, QrCode } from 'lucide-react';
 import CouponCodeTable from '@/components/CouponCodeTable';
 import DeleteCouponButton from '@/components/DeleteCouponButton';
+import DirectSendButton from '@/components/DirectSendButton';
 import styles from './detail.module.css';
 
 export default async function CouponDetailPage({
@@ -63,6 +64,9 @@ export default async function CouponDetailPage({
           </div>
         </div>
         <div className={styles.headerActions}>
+          {coupon.mode === 'SINGLE_USE' && (
+            <DirectSendButton couponId={coupon.id} />
+          )}
           <Link href={`/admin/coupons/${coupon.id}/edit`} className="btn btn-outline">
             <Edit size={20} />
             編輯
