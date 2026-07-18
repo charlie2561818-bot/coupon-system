@@ -11,6 +11,10 @@ export default function StaffScannerPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState<{ type: 'success' | 'error', message: string, detail?: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastScannedCode = useRef<string | null>(null);
+  const lastScannedTime = useRef<number>(0);
+  const isLoadingRef = useRef<boolean>(false);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto focus on mount
   useEffect(() => {
@@ -39,11 +43,16 @@ export default function StaffScannerPage() {
   };
 
   const processRedeem = async (rawInput: string) => {
-    if (!rawInput.trim()) return;
+    if (!rawInput.trim() || isLoadingRef.current) return;
 
     const code = extractCode(rawInput);
     setIsLoading(true);
+    isLoadingRef.current = true;
     setResult(null);
+
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
 
     try {
       const res = await fetch('/api/redeem', {
@@ -69,8 +78,13 @@ export default function StaffScannerPage() {
       setResult({ type: 'error', message: '系統錯誤', detail: '無法連接至伺服器' });
     } finally {
       setIsLoading(false);
+      isLoadingRef.current = false;
       setInputValue(''); 
       setTimeout(() => inputRef.current?.focus(), 100);
+
+      toastTimerRef.current = setTimeout(() => {
+        setResult(null);
+      }, 3000);
     }
   };
 
@@ -82,7 +96,19 @@ export default function StaffScannerPage() {
   const handleCameraScan = (detectedCodes: any[]) => {
     if (detectedCodes && detectedCodes.length > 0) {
       const scannedValue = detectedCodes[0].rawValue;
-      setIsScanning(false);
+      const now = Date.now();
+
+      // If currently loading/processing an API request, ignore
+      if (isLoadingRef.current) return;
+
+      // If same code scanned within 2 seconds, ignore
+      if (scannedValue === lastScannedCode.current && (now - lastScannedTime.current) < 2000) {
+        return;
+      }
+
+      lastScannedCode.current = scannedValue;
+      lastScannedTime.current = now;
+
       setInputValue(scannedValue);
       processRedeem(scannedValue);
     }

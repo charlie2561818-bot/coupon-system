@@ -67,13 +67,19 @@
 }
 
 .resultAlert {
-  margin-top: 2rem;
-  width: 100%;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 90%;
+  max-width: 500px;
   padding: 1.25rem;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: 1rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 .resultSuccess {
