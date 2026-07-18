@@ -55,7 +55,7 @@ export default function NewCouponPage() {
           validUntil: new Date(validUntil).toISOString(),
           applicableBrand,
           discountType,
-          discountValue: parseFloat(discountValue),
+          discountValue: discountType === 'FREE_GIFT' ? 0 : parseFloat(discountValue),
         }),
       });
 
@@ -212,24 +212,26 @@ export default function NewCouponPage() {
               >
                 <option value="FIXED_AMOUNT">固定金額折抵 (元)</option>
                 <option value="PERCENTAGE">打折 (%)</option>
-                <option value="FREE_GIFT">滿額贈 / 兌換券</option>
+                <option value="FREE_GIFT">商品兌換 (GIFT)</option>
               </select>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="discountValue">折扣數值</label>
-              <input
-                id="discountValue"
-                type="number"
-                min="0"
-                step="0.1"
-                className="form-input"
-                value={discountValue}
-                onChange={(e) => setDiscountValue(e.target.value)}
-                required
-                placeholder={discountType === 'PERCENTAGE' ? '例如 90 (表示 9 折)' : '輸入金額或 0 (若為兌換券)'}
-              />
-            </div>
+            {discountType !== 'FREE_GIFT' && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="discountValue">折扣數值</label>
+                <input
+                  id="discountValue"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className="form-input"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  required
+                  placeholder={discountType === 'PERCENTAGE' ? '例如 90 (表示 9 折)' : '輸入折扣金額'}
+                />
+              </div>
+            )}
 
             <div className="form-group">
               <label className="form-label" htmlFor="validFrom">生效時間</label>

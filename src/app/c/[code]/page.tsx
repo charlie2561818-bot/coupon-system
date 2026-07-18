@@ -132,9 +132,11 @@ export default async function CouponPublicPage({ params }: PageProps) {
           </h2>
         )}
         
-        <div className={styles.discountBadge}>
-          {formatDiscount(coupon.discountType, coupon.discountValue)}
-        </div>
+        {coupon.discountType !== 'FREE_GIFT' && (
+          <div className={styles.discountBadge}>
+            {formatDiscount(coupon.discountType, coupon.discountValue)}
+          </div>
+        )}
 
         <div className={styles.divider}></div>
 
