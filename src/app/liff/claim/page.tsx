@@ -18,7 +18,7 @@ interface ClaimResult {
 export default function LiffClaimPage() {
   const [liffError, setLiffError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [phase, setPhase] = useState<'IDLE' | 'PLAYING' | 'REVEAL'>('IDLE');
+  const [phase, setPhase] = useState<'IDLE' | 'FETCHING' | 'PLAYING' | 'REVEAL'>('IDLE');
   const [showFlash, setShowFlash] = useState(false);
   const [result, setResult] = useState<ClaimResult | null>(null);
   const [qrValue, setQrValue] = useState('');
@@ -82,7 +82,7 @@ export default function LiffClaimPage() {
   const claimCoupon = async () => {
     if (!profile || !activeCampaignId) return;
     
-    setPhase('PLAYING');
+    setPhase('FETCHING');
     
     fetch(`/api/claim/line/${activeCampaignId}`, {
       method: 'POST',
@@ -95,17 +95,28 @@ export default function LiffClaimPage() {
         if (data.campaignId) {
           localStorage.setItem(`hasDrawn_${data.campaignId}`, 'true');
         }
+        setPhase('PLAYING');
       })
       .catch(err => {
         console.error(err);
         setResult({ success: false, message: '網路連線異常，請稍後再試。' });
+        setPhase('REVEAL');
       });
+  };
 
-    setTimeout(() => {
-      setShowFlash(true);
-      setPhase('REVEAL');
-      setTimeout(() => setShowFlash(false), 500);
-    }, 10000);
+  const handleVideoEnded = () => {
+    if (result && result.success) {
+      const audioUrl = result.won ? '/win-sound.mp3' : '/lose-sound.mp3';
+      const audio = new window.Audio(audioUrl);
+      audio.play().catch(e => console.error('Audio play failed:', e));
+      
+      if (!result.won) {
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 500);
+      }
+    }
+    
+    setPhase('REVEAL');
   };
 
   const handleClose = async () => {
@@ -122,12 +133,18 @@ export default function LiffClaimPage() {
       <div className={styles.card}>
         {showFlash && <div className={styles.shatterFlash}></div>}
 
-        {phase === 'PLAYING' ? (
+        {phase === 'FETCHING' ? (
+          <div className={styles.loadingWrapper}>
+            <div className={styles.spinner}></div>
+            <p className={styles.instructions}>正在為您開獎 (Drawing for you...)</p>
+          </div>
+        ) : phase === 'PLAYING' ? (
           <div className={styles.videoContainer}>
             <video 
-              src="/blindbox-animation.mp4" 
+              src={result?.won ? "/win-animation.mp4" : "/lose-animation.mp4"} 
               autoPlay 
               playsInline 
+              onEnded={handleVideoEnded}
               style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
             />
           </div>
@@ -217,8 +234,12 @@ export default function LiffClaimPage() {
                 </>
               ) : (
                 <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎 (Not a Winner)</p>
-                  <p>{result.message || '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'}</p>
+                  <div className={styles.qrWrapper} style={{ background: 'transparent', boxShadow: 'none', margin: 0, padding: 0 }}>
+                    <div>
+                      <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎 (Not a Winner)</p>
+                      <p>{result.message || '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'}</p>
+                    </div>
+                  </div>
                 </div>
               )
             ) : (

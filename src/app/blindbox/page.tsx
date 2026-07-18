@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import styles from './blindbox.module.css';
 
-type Phase = 'IDLE' | 'PLAYING' | 'REVEAL';
+type Phase = 'IDLE' | 'FETCHING' | 'PLAYING' | 'REVEAL';
 
 export default function BlindboxPage() {
   const [phase, setPhase] = useState<Phase>('IDLE');
@@ -20,26 +20,40 @@ export default function BlindboxPage() {
   }, [result?.code]);
 
   const handleStartDraw = async () => {
-    setPhase('PLAYING');
+    setPhase('FETCHING');
     setResult(null);
 
-    // 1. 在背景立刻發送抽獎請求
+    // 1. 顯示載入中，並向 API 請求結果
     fetch('/api/blindbox', { method: 'POST' })
       .then(res => res.json())
-      .then(data => setResult(data))
+      .then(data => {
+        setResult(data);
+        // 2. 取得結果後，進入 PLAYING 狀態開始播放對應的影片
+        setPhase('PLAYING');
+      })
       .catch(err => {
         console.error(err);
         setResult({ success: false, message: '網路連線異常，請稍後再試。' });
+        setPhase('REVEAL');
       });
+  };
 
-    // 2. 在 10 秒時，剛好是影片播完、茶杯摔破的瞬間
-    setTimeout(() => {
-      setShowFlash(true); // 觸發碎裂閃光特效
-      setPhase('REVEAL'); // 切換到揭曉畫面
+  const handleVideoEnded = () => {
+    // 根據抽獎結果播放對應音效
+    if (result && result.success) {
+      const audioUrl = result.won ? '/win-sound.mp3' : '/lose-sound.mp3';
+      const audio = new window.Audio(audioUrl);
+      audio.play().catch(e => console.error('Audio play failed:', e));
       
-      // 閃光特效持續一下後移除
-      setTimeout(() => setShowFlash(false), 500);
-    }, 10000);
+      // 未中獎（摔破茶杯）時，保留碎裂閃光特效
+      if (!result.won) {
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 500);
+      }
+    }
+    
+    // 切換到揭曉畫面
+    setPhase('REVEAL');
   };
 
   const handleReset = () => {
@@ -68,13 +82,22 @@ export default function BlindboxPage() {
         </div>
       )}
 
+      {phase === 'FETCHING' && (
+        <div className={styles.idleWrapper} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div className={styles.spinner} style={{ marginBottom: '1rem', width: '40px', height: '40px', border: '3px solid #e0e5e0', borderTopColor: '#6b8c6a', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ fontSize: '1.2rem', color: '#666' }}>正在為您開獎...<br/><span style={{ fontSize: '1rem', opacity: 0.8 }}>(Drawing...)</span></p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
       {phase === 'PLAYING' && (
         <div className={styles.videoContainer}>
-          {/* 這是真正的影片播放器，它會去抓取 public/blindbox-animation.mp4 */}
+          {/* 根據結果動態載入對應的影片 */}
           <video 
-            src="/blindbox-animation.mp4" 
+            src={result?.won ? "/win-animation.mp4" : "/lose-animation.mp4"} 
             autoPlay 
             playsInline 
+            onEnded={handleVideoEnded}
             style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
           />
         </div>
@@ -116,8 +139,12 @@ export default function BlindboxPage() {
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                <h2 className={styles.prizeTitle} style={{ color: '#5c6e5c' }}>未中獎<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Not a Winner)</span></h2>
-                <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{result.message}</p>
+                <div className={styles.qrWrapper} style={{ background: 'transparent', boxShadow: 'none' }}>
+                  <div>
+                    <h2 className={styles.prizeTitle} style={{ color: '#5c6e5c' }}>未中獎<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Not a Winner)</span></h2>
+                    <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{result.message}</p>
+                  </div>
+                </div>
               </div>
             )
           ) : (
