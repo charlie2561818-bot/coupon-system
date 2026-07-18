@@ -114,6 +114,37 @@
   margin-top: 2rem;
 }
 
+.qrWrapper {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  animation: cupBounceOut 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  /* Shift origin slightly below center to match teacup position */
+  transform-origin: center 60%;
+}
+
+@keyframes cupBounceOut {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  80% {
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .btn {
   display: inline-block;
   width: 100%;

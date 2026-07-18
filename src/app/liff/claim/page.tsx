@@ -128,7 +128,7 @@ export default function LiffClaimPage() {
               src="/blindbox-animation.mp4" 
               autoPlay 
               playsInline 
-              style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
             />
           </div>
         ) : phase === 'IDLE' ? (
