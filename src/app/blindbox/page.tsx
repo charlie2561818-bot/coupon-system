@@ -54,9 +54,19 @@ export default function BlindboxPage() {
 
       {phase === 'PLAYING' && (
         <div className={styles.videoContainer}>
-          <div className={styles.videoPlaceholder}>
+          {/* 這是真正的影片播放器，它會去抓取 public/blindbox-animation.mp4 */}
+          <video 
+            src="/blindbox-animation.mp4" 
+            autoPlay 
+            playsInline 
+            muted 
+            style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+          />
+          
+          {/* 如果影片還沒放進去，或是載入失敗，就會顯示這個預設備用畫面 */}
+          <div className={styles.videoPlaceholder} style={{ position: 'relative', zIndex: 0 }}>
             <h2>☕️ 老闆正在喝熱茶...</h2>
-            <p style={{ opacity: 0.8 }}>(這裡未來可以放入老闆喝茶燙到並摔破茶杯的影片)</p>
+            <p style={{ opacity: 0.8 }}>(請將您的影片命名為 blindbox-animation.mp4 並放入 public 資料夾中)</p>
             <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
               <span style={{ fontSize: '2rem', animation: 'shakeText 0.3s infinite' }}>🔥</span>
               <span style={{ fontSize: '2rem', animation: 'shakeText 0.4s infinite' }}>💦</span>
