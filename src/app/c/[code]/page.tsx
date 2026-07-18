@@ -226,6 +226,11 @@ export default async function CouponPublicPage({ params }: PageProps) {
             )}
           </div>
         )}
+
+        <div style={{ marginTop: '2.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
+          本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
+          We reserve the right to modify, interpret, or cancel this promotion at any time.
+        </div>
       </div>
     </div>
   );
