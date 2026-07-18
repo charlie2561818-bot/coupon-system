@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({
         success: true,
         won: false,
-        message: '哎呀，差一點點！' // 前端會有更詳細的文字，這裡傳基本的
+        message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
 

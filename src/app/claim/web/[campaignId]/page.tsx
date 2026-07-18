@@ -116,8 +116,8 @@ export default function WebClaimPage() {
                 </>
               ) : (
                 <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎</p>
-                  <p>{result.message || '哎呀，差一點點！下次再來試試手氣吧！'}</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎 (Not a Winner)</p>
+                  <p>{result.message || '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'}</p>
                 </div>
               )
             ) : (

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         success: true,
         won: false,
         alreadyClaimed: false,
-        message: '哎呀，差一點點！下次再來試試手氣吧！'
+        message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
 
