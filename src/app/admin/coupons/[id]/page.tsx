@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Tag, CheckCircle2, Ticket, Percent, Edit, QrCode }
 import CouponCodeTable from '@/components/CouponCodeTable';
 import DeleteCouponButton from '@/components/DeleteCouponButton';
 import DirectSendButton from '@/components/DirectSendButton';
+import CopyWebLinkButton from '@/components/CopyWebLinkButton';
 import styles from './detail.module.css';
 
 export default async function CouponDetailPage({
@@ -65,7 +66,10 @@ export default async function CouponDetailPage({
         </div>
         <div className={styles.headerActions}>
           {coupon.mode === 'SINGLE_USE' && (
-            <DirectSendButton couponId={coupon.id} />
+            <>
+              <CopyWebLinkButton campaignId={coupon.id} />
+              <DirectSendButton couponId={coupon.id} />
+            </>
           )}
           <Link href={`/admin/coupons/${coupon.id}/edit`} className="btn btn-outline">
             <Edit size={20} />
