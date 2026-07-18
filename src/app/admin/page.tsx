@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import { PlusCircle, Ticket, CheckCircle, Clock } from 'lucide-react';
+import { PlusCircle, Ticket, CheckCircle, Clock, MapPin } from 'lucide-react';
 import DeleteCouponButton from '@/components/DeleteCouponButton';
+import QrLocationManager from '@/components/QrLocationManager';
 import styles from './admin.module.css';
 
 export default async function AdminDashboard() {
@@ -129,6 +130,15 @@ export default async function AdminDashboard() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* 實體立牌管理 */}
+      <div className="card" style={{ marginTop: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <MapPin size={22} style={{ color: 'var(--primary-color)' }} />
+          <h2 className="h3" style={{ margin: 0 }}>實體立牌管理 (QR Code Stands)</h2>
+        </div>
+        <QrLocationManager />
       </div>
     </div>
   );

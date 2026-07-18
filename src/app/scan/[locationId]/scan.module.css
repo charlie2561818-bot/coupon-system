@@ -1,0 +1,303 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #faf9f6;
+  overflow: hidden;
+  position: relative;
+  font-family: "Noto Serif TC", "Shippori Mincho", "Helvetica Neue", Arial, sans-serif;
+  color: #2c3e2e;
+}
+
+/* ===== IDLE State ===== */
+.idleWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  z-index: 10;
+  padding: 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2c3e2e;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  letter-spacing: 2px;
+}
+
+.drawBtn {
+  font-size: 1.5rem;
+  padding: 1.25rem 3rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #c5d8c5, #6b8c6a);
+  color: #1a2e1a;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+  border: 2px solid #6b8c6a;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: pulseButton 2s infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.drawBtn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes pulseButton {
+  0% { box-shadow: 0 0 0 0 rgba(107, 140, 106, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(107, 140, 106, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(107, 140, 106, 0); }
+}
+
+/* ===== FETCHING State ===== */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e5e0;
+  border-top-color: #6b8c6a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Video Container ===== */
+.videoContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* ===== Flash effect ===== */
+.shatterFlash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  z-index: 10000;
+  animation: flash 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ===== REVEAL State ===== */
+.resultContainer {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  animation: popUpScaleIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-origin: center center;
+  max-width: 420px;
+  width: 90%;
+}
+
+@keyframes popUpScaleIn {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.3) translateY(100px); 
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+    filter: blur(0px);
+  }
+}
+
+.prizeTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2c3e2e;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.prizeSubtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.qrWrapper {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  animation: cupBounceOut 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-origin: center 60%;
+}
+
+@keyframes cupBounceOut {
+  0% {
+    opacity: 0;
+    transform: scale(0.1) translateY(20vh);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.15) translateY(-5vh);
+  }
+  70% {
+    transform: scale(0.95) translateY(2vh);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.codeBox {
+  text-align: center;
+  background: #e8f0e8;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  border: 1px dashed #6b8c6a;
+}
+
+.codeLabel {
+  font-size: 0.9rem;
+  color: #6b8c6a;
+  margin-bottom: 0.25rem;
+}
+
+.codeValue {
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #2c3e2e;
+}
+
+/* ===== EMPTY / Blocked State ===== */
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  max-width: 420px;
+  width: 90%;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.emptyTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e2e;
+  margin-bottom: 0.75rem;
+}
+
+.emptySubtitle {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* ===== Blocked (already claimed) State ===== */
+.blockedContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  max-width: 420px;
+  width: 90%;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.blockedIcon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.blockedTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e2e;
+  margin-bottom: 0.75rem;
+}
+
+.blockedSubtitle {
+  font-size: 1rem;
+  color: #888;
+  line-height: 1.6;
+}
+
+/* ===== Reset Button ===== */
+.resetBtn {
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 9999px;
+  border: none;
+  background: #e5e7eb;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.resetBtn:hover {
+  background: #d1d5db;
+}
+
+/* ===== Loading shimmer ===== */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}

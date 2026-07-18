@@ -73,3 +73,11 @@ model Redemption {
   @@index([couponCodeId])
   @@index([staffId])
 }
+
+model QrLocation {
+  id               String   @id @default(uuid())
+  name             String   // 立牌名稱，例如：泡茶區原木立牌
+  activeCampaignId String?  // 綁定的活動 ID，可為特定 campaignId、'BLINDBOX' 或 null
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
