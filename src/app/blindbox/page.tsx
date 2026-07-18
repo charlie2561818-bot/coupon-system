@@ -13,6 +13,20 @@ export default function BlindboxPage() {
   const [result, setResult] = useState<any>(null);
   const [qrValue, setQrValue] = useState('');
 
+  function formatMessage(msg: string | undefined) {
+    if (!msg) return null;
+    const parts = msg.split(' (');
+    if (parts.length === 2) {
+      return (
+        <>
+          {parts[0]}<br/>
+          <span style={{ fontSize: '0.85em', opacity: 0.8 }}>({parts[1]}</span>
+        </>
+      );
+    }
+    return msg;
+  }
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const winAudioRef = useRef<HTMLAudioElement | null>(null);
   const loseAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -177,7 +191,7 @@ export default function BlindboxPage() {
                 <div className={styles.qrWrapper} style={{ background: 'transparent', boxShadow: 'none' }}>
                   <div>
                     <h2 className={styles.prizeTitle} style={{ color: '#5c6e5c' }}>未中獎<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Not a Winner)</span></h2>
-                    <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{result.message}</p>
+                    <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{formatMessage(result.message)}</p>
                   </div>
                 </div>
               </div>
@@ -185,7 +199,7 @@ export default function BlindboxPage() {
           ) : (
             <>
               <h2 className={styles.prizeTitle} style={{ color: '#ef4444' }}>😅 哎呀！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Oops!)</span></h2>
-              <p className={styles.prizeSubtitle}>{result?.message || '抽獎失敗，請稍後再試。 (Draw failed, please try again later.)'}</p>
+              <p className={styles.prizeSubtitle}>{formatMessage(result?.message || '抽獎失敗，請稍後再試。 (Draw failed, please try again later.)')}</p>
             </>
           )}
 
@@ -203,7 +217,7 @@ export default function BlindboxPage() {
               transition: 'background 0.2s'
             }}
           >
-            完成 / 換下一位<br/><span style={{fontSize:'0.85rem'}}>(Finish / Next)</span>
+            完成<br/><span style={{fontSize:'0.85rem'}}>(Finish)</span>
           </button>
         </div>
       )}

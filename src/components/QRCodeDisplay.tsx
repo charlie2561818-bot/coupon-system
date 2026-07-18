@@ -17,9 +17,13 @@ export default function QRCodeDisplay({ value, title }: QRCodeDisplayProps) {
   useEffect(() => {
     // Generate a full URL for the QR code so scanning it opens the browser directly
     if (typeof window !== 'undefined') {
-      setQrValue(`${window.location.origin}/c/${value}`);
+      const url = `${window.location.origin}/c/${value}`;
+      if (qrValue !== url) {
+        // Use setTimeout to avoid synchronous setState warning during render cycle
+        setTimeout(() => setQrValue(url), 0);
+      }
     }
-  }, [value]);
+  }, [value, qrValue]);
 
   const downloadQRCode = () => {
     const canvas = qrRef.current?.querySelector('canvas');

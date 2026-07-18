@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
+
+async function checkAdminAuth() {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any).role !== 'ADMIN') {
+    return false;
+  }
+  return true;
+}
 
 // GET: 取得所有立牌位置
 export async function GET() {
   try {
+    if (!(await checkAdminAuth())) {
+      return NextResponse.json({ success: false, message: '權限不足' }, { status: 403 });
+    }
+
     const locations = await prisma.qrLocation.findMany({
       orderBy: { createdAt: 'desc' }
     });
@@ -37,6 +51,10 @@ export async function GET() {
 // POST: 新增立牌位置
 export async function POST(request: NextRequest) {
   try {
+    if (!(await checkAdminAuth())) {
+      return NextResponse.json({ success: false, message: '權限不足' }, { status: 403 });
+    }
+
     const { name } = await request.json();
 
     if (!name || name.trim() === '') {
@@ -60,6 +78,10 @@ export async function POST(request: NextRequest) {
 // PUT: 更新立牌綁定
 export async function PUT(request: NextRequest) {
   try {
+    if (!(await checkAdminAuth())) {
+      return NextResponse.json({ success: false, message: '權限不足' }, { status: 403 });
+    }
+
     const { id, activeCampaignId } = await request.json();
 
     if (!id) {
@@ -84,6 +106,10 @@ export async function PUT(request: NextRequest) {
 // DELETE: 刪除立牌位置
 export async function DELETE(request: NextRequest) {
   try {
+    if (!(await checkAdminAuth())) {
+      return NextResponse.json({ success: false, message: '權限不足' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

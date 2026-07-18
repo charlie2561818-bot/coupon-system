@@ -46,7 +46,7 @@ export default function SecuritySettings() {
       } else {
         setUnameMsg({ type: 'error', text: data.message || '修改失敗' });
       }
-    } catch (err) {
+    } catch (_err) {
       setUnameMsg({ type: 'error', text: '系統錯誤' });
     } finally {
       setUnameLoading(false);
@@ -72,7 +72,7 @@ export default function SecuritySettings() {
       } else {
         setPwdMsg({ type: 'error', text: data.message || '修改失敗' });
       }
-    } catch (err) {
+    } catch (_err) {
       setPwdMsg({ type: 'error', text: '系統錯誤' });
     } finally {
       setPwdLoading(false);
@@ -97,7 +97,7 @@ export default function SecuritySettings() {
       } else {
         setSecMsg({ type: 'error', text: data.message || '設定失敗' });
       }
-    } catch (err) {
+    } catch (_err) {
       setSecMsg({ type: 'error', text: '系統錯誤' });
     } finally {
       setSecLoading(false);

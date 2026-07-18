@@ -9,7 +9,7 @@ import styles from './Sidebar.module.css';
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const role = (session?.user as any)?.role || 'STAFF';
+  const role = session?.user?.role || 'STAFF';
 
   const navItems = [
     { name: '總覽', href: '/admin', icon: LayoutDashboard, roles: ['ADMIN'] },

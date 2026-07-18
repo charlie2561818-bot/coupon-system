@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Plus, Trash2, Link as LinkIcon, Box, QrCode } from 'lucide-react';
+import { MapPin, Plus, Trash2, Link as LinkIcon, QrCode } from 'lucide-react';
 
 interface QrLocation {
   id: string;
@@ -41,7 +41,10 @@ export default function QrLocationManager() {
   };
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const showMessage = (text: string, type: 'success' | 'error') => {
@@ -65,7 +68,7 @@ export default function QrLocationManager() {
       } else {
         showMessage(data.message || '新增失敗', 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       showMessage('新增失敗', 'error');
     }
   };
@@ -85,7 +88,7 @@ export default function QrLocationManager() {
       } else {
         showMessage(data.message || '更新失敗', 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       showMessage('更新失敗', 'error');
     } finally {
       setSavingId(null);
@@ -103,7 +106,7 @@ export default function QrLocationManager() {
       } else {
         showMessage(data.message || '刪除失敗', 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       showMessage('刪除失敗', 'error');
     }
   };

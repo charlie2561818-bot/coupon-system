@@ -7,6 +7,20 @@ import styles from './scan.module.css';
 
 type PageState = 'LOADING' | 'EMPTY' | 'BLOCKED' | 'IDLE' | 'FETCHING' | 'PLAYING' | 'REVEAL';
 
+function formatMessage(msg: string | undefined) {
+  if (!msg) return null;
+  const parts = msg.split(' (');
+  if (parts.length === 2) {
+    return (
+      <>
+        {parts[0]}<br/>
+        <span style={{ fontSize: '0.85em', opacity: 0.8 }}>({parts[1]}</span>
+      </>
+    );
+  }
+  return msg;
+}
+
 interface LocationInfo {
   status: 'EMPTY' | 'SINGLE_ITEM' | 'BLINDBOX';
   locationName: string;
@@ -298,7 +312,7 @@ export default function ScanPage() {
                 <div className={styles.qrWrapper} style={{ background: 'transparent', boxShadow: 'none' }}>
                   <div>
                     <h2 className={styles.prizeTitle} style={{ color: '#5c6e5c' }}>未中獎<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Not a Winner)</span></h2>
-                    <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{result.message}</p>
+                    <p className={styles.prizeSubtitle} style={{ marginTop: '1rem', fontSize: '1.2rem' }}>{formatMessage(result.message)}</p>
                   </div>
                 </div>
               </div>
@@ -306,12 +320,12 @@ export default function ScanPage() {
           ) : (
             <>
               <h2 className={styles.prizeTitle} style={{ color: '#ef4444' }}>😅 哎呀！<br/><span style={{fontSize: '1.2rem', fontWeight: 'normal'}}>(Oops!)</span></h2>
-              <p className={styles.prizeSubtitle}>{result?.message || '抽獎失敗，請稍後再試。 (Draw failed, please try again later.)'}</p>
+              <p className={styles.prizeSubtitle}>{formatMessage(result?.message || '抽獎失敗，請稍後再試。 (Draw failed, please try again later.)')}</p>
             </>
           )}
 
           <button className={styles.resetBtn} onClick={handleReset}>
-            完成 / 回首頁<br/><span style={{fontSize:'0.85rem'}}>(Finish / Home)</span>
+            完成<br/><span style={{fontSize:'0.85rem'}}>(Finish)</span>
           </button>
         </div>
       )}

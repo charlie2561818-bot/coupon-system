@@ -11,12 +11,10 @@ interface DirectSendButtonProps {
 export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
   const [isSending, setIsSending] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleDirectSend = async () => {
     setIsSending(true);
-    setError(null);
     try {
       const res = await fetch(`/api/coupons/${couponId}/direct-send`, {
         method: 'POST',
@@ -28,12 +26,10 @@ export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
         setGeneratedCode(data.code);
         setIsModalOpen(true);
       } else {
-        setError(data.error || '派發失敗');
         alert(data.error || '派發失敗，可能已無可用序號');
       }
     } catch (err) {
       console.error(err);
-      setError('網路異常');
       alert('網路異常，請稍後再試');
     } finally {
       setIsSending(false);
