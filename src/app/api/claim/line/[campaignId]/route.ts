@@ -44,8 +44,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // 隨機抽獎邏輯
-    // 隨機抽獎邏輯 (暫時調為 100% 供測試用)
-    const WIN_RATE = 1.0; // 100% 中獎率
+    // 隨機抽獎邏輯
+    const WIN_RATE = 0.3; // 30% 中獎率
     const isWinner = Math.random() <= WIN_RATE;
 
     if (!isWinner) {

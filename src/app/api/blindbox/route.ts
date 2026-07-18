@@ -35,8 +35,8 @@ export async function POST() {
     }
 
     // 3. 加入 30% 中獎率判定
-    // 3. 加入 100% 中獎率判定 (暫時供測試用)
-    const WIN_RATE = 1.0;
+    // 3. 加入 30% 中獎率判定
+    const WIN_RATE = 0.3;
     if (Math.random() > WIN_RATE) {
       return NextResponse.json({
         success: true,
