@@ -1,6 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function GET() {
+  try {
+    const now = new Date();
+    const activeCampaign = await prisma.coupon.findFirst({
+      where: {
+        mode: 'SINGLE_USE',
+        status: 'ACTIVE',
+        validFrom: { lte: now },
+        validUntil: { gte: now },
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!activeCampaign) {
+      return NextResponse.json({ success: false, message: '目前沒有進行中的活動' });
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      campaignId: activeCampaign.id,
+      title: activeCampaign.title 
+    });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: '伺服器錯誤' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { userId, displayName } = await request.json();
@@ -44,8 +71,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         alreadyClaimed: true,
+        won: true,
         code: existingCode.code,
+        campaignId: activeCampaign.id,
         message: '您已經領取過此活動的專屬序號囉！'
+      });
+    }
+
+    // 2.5 隨機抽獎邏輯
+    const WIN_RATE = 0.3; // 30% 中獎率 (可在此調整)
+    const isWinner = Math.random() <= WIN_RATE;
+
+    if (!isWinner) {
+      return NextResponse.json({
+        success: true,
+        won: false,
+        alreadyClaimed: false,
+        campaignId: activeCampaign.id,
+        message: '哎呀，差一點點！下次再來試試手氣吧！'
       });
     }
 
@@ -77,9 +120,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      won: true,
       alreadyClaimed: false,
       code: updatedCode.code,
-      message: `嗨 ${displayName || '好友'}，這是您的專屬優惠碼！`
+      campaignId: activeCampaign.id,
+      message: `嗨 ${displayName || '好友'}，恭喜中獎！這是您的專屬優惠碼！`
     });
 
   } catch (error) {

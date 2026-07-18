@@ -6,8 +6,10 @@ import styles from './liff.module.css';
 
 interface ClaimResult {
   success: boolean;
+  won?: boolean;
   code?: string;
   message?: string;
+  campaignId?: string;
   alreadyClaimed?: boolean;
 }
 
@@ -17,6 +19,10 @@ export default function LiffClaimPage() {
   const [isClaiming, setIsClaiming] = useState(false);
   const [result, setResult] = useState<ClaimResult | null>(null);
   const [qrValue, setQrValue] = useState('');
+  
+  const [profile, setProfile] = useState<{ userId: string, displayName: string } | null>(null);
+  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
+  const [hasDrawn, setHasDrawn] = useState(false);
 
   useEffect(() => {
     if (result?.code && typeof window !== 'undefined') {
@@ -42,14 +48,27 @@ export default function LiffClaimPage() {
           return;
         }
 
-        const profile = await liff.getProfile();
+        const userProfile = await liff.getProfile();
+        setProfile({ userId: userProfile.userId, displayName: userProfile.displayName });
         
-        // 開始呼叫後端領券 API
-        await claimCoupon(profile.userId, profile.displayName);
-
+        // 檢查是否有進行中的活動
+        const res = await fetch('/api/line-claim');
+        const data = await res.json();
+        
+        if (data.success && data.campaignId) {
+          setActiveCampaignId(data.campaignId);
+          // 檢查 LocalStorage 是否已經抽過
+          const drawn = localStorage.getItem(`hasDrawn_${data.campaignId}`);
+          if (drawn === 'true') {
+            setHasDrawn(true);
+          }
+        } else {
+          setLiffError(data.message || '目前沒有進行中的活動');
+        }
       } catch (err: any) {
         console.error('LIFF 初始化失敗:', err);
         setLiffError(err.message || '初始化失敗，請在 LINE App 中開啟此連結。');
+      } finally {
         setIsInitializing(false);
       }
     };
@@ -57,42 +76,29 @@ export default function LiffClaimPage() {
     initLiff();
   }, []);
 
-  const claimCoupon = async (userId: string, displayName: string) => {
+  const claimCoupon = async () => {
+    if (!profile) return;
+    
     setIsClaiming(true);
     try {
-      // 假設未來 API 叫做 /api/line-claim
-      // 這裡先使用 setTimeout 模擬打 API 的過程 (前端先完成畫面規劃)
-      
       const res = await fetch('/api/line-claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, displayName })
+        body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName })
       });
       
-      // 如果 API 還沒開通，會回傳 404，我們在此捕捉並顯示提示
-      if (!res.ok) {
-        // 為了讓您先預覽畫面，這邊做一個假成功/假失敗的處理
-        if (res.status === 404) {
-          setResult({
-            success: true,
-            code: 'TDM-X9A-8B2',
-            message: '(此為預覽畫面，後端 API 尚未串接)'
-          });
-        } else {
-          const data = await res.json();
-          setResult(data);
-        }
-      } else {
-        const data = await res.json();
-        setResult(data);
+      const data = await res.json();
+      setResult(data);
+      
+      if (data.campaignId) {
+        localStorage.setItem(`hasDrawn_${data.campaignId}`, 'true');
+        setHasDrawn(true);
       }
-
     } catch (err) {
       console.error(err);
       setResult({ success: false, message: '網路連線異常，請稍後再試。' });
     } finally {
       setIsClaiming(false);
-      setIsInitializing(false);
     }
   };
 
@@ -108,58 +114,73 @@ export default function LiffClaimPage() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>專屬優惠領取</h1>
+        <h1 className={styles.title}>專屬優惠抽獎</h1>
         <p className={styles.subtitle}>LINE 官方帳號會員限定</p>
 
         {isInitializing || isClaiming ? (
           <div className={styles.loadingWrapper}>
             <div className={styles.spinner}></div>
             <p className={styles.instructions}>
-              {isInitializing ? '正在驗證您的身分...' : '正在為您保留優惠券...'}
+              {isInitializing ? '正在準備抽獎系統...' : '正在為您開獎...'}
             </p>
           </div>
         ) : liffError ? (
           <div className={styles.errorBox}>
-            <strong>驗證失敗</strong>
+            <strong>活動提示</strong>
             <p style={{ marginTop: '0.5rem' }}>{liffError}</p>
           </div>
-        ) : result?.success ? (
+        ) : result ? (
           <div className={styles.successWrapper}>
-            {result.alreadyClaimed ? (
-              <p style={{ color: '#7a8b7a', marginBottom: '1rem' }}>您已經領取過此優惠囉！</p>
+            {result.success ? (
+              result.won ? (
+                <>
+                  {result.alreadyClaimed ? (
+                    <p style={{ color: '#7a8b7a', marginBottom: '1rem' }}>您已經領取過此優惠囉！</p>
+                  ) : (
+                    <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
+                  )}
+                  
+                  {qrValue && (
+                    <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                      <QRCodeCanvas 
+                        value={qrValue}
+                        size={200}
+                        level={"H"}
+                        includeMargin={true}
+                        bgColor={"#ffffff"}
+                        fgColor={"#2c3e2e"}
+                      />
+                    </div>
+                  )}
+                  
+                  <div className={styles.codeBox}>
+                    <div className={styles.codeLabel}>專屬序號</div>
+                    <div className={styles.codeValue}>{result.code}</div>
+                  </div>
+                  
+                  <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>
+                    <strong>本優惠適用於現場結帳與線上客服（LINE/FB/IG）。</strong><br/>
+                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Valid for in-store and online messages (LINE/FB/IG).)</span><br/><br/>
+                    <strong>現場結帳：</strong>請於結帳時向服務人員出示此畫面。<br/>
+                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(In-store: Please present this screen to our staff at checkout.)</span><br/><br/>
+                    <strong>線上客服：</strong>請截圖此畫面或提供上方的『優惠代碼』傳送給我們。<br/>
+                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Online: Please send a screenshot of this page or the Promo Code to us via message.)</span>
+                    <span style={{ fontSize: '0.8rem', color: '#999', display: 'block', marginTop: '1rem', textAlign: 'center' }}>
+                      {result.message}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎</p>
+                  <p>{result.message || '哎呀，差一點點！下次再來試試手氣吧！'}</p>
+                </div>
+              )
             ) : (
-              <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500 }}>領取成功！您的專屬兌換碼為：</p>
-            )}
-            
-            {qrValue && (
-              <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                <QRCodeCanvas 
-                  value={qrValue}
-                  size={200}
-                  level={"H"}
-                  includeMargin={true}
-                  bgColor={"#ffffff"}
-                  fgColor={"#2c3e2e"}
-                />
+              <div className={styles.errorBox} style={{ borderLeftColor: '#ef4444', background: '#fef2f2', color: '#b91c1c' }}>
+                <p>{result.message}</p>
               </div>
             )}
-            
-            <div className={styles.codeBox}>
-              <div className={styles.codeLabel}>專屬序號</div>
-              <div className={styles.codeValue}>{result.code}</div>
-            </div>
-            
-            <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>本優惠適用於現場結帳與線上客服（LINE/FB/IG）。</strong><br/>
-              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Valid for in-store and online messages (LINE/FB/IG).)</span><br/><br/>
-              <strong>現場結帳：</strong>請於結帳時向服務人員出示此畫面。<br/>
-              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(In-store: Please present this screen to our staff at checkout.)</span><br/><br/>
-              <strong>線上客服：</strong>請截圖此畫面或提供上方的『優惠代碼』傳送給我們。<br/>
-              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Online: Please send a screenshot of this page or the Promo Code to us via message.)</span>
-              <span style={{ fontSize: '0.8rem', color: '#999', display: 'block', marginTop: '1rem', textAlign: 'center' }}>
-                {result.message}
-              </span>
-            </div>
 
             <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
               本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
@@ -172,16 +193,23 @@ export default function LiffClaimPage() {
           </div>
         ) : (
           <div className={styles.successWrapper}>
-            <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
-              <p>{result?.message || '優惠券發送完畢或活動已結束。'}</p>
-            </div>
+            {hasDrawn ? (
+              <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
+                <p>您已經抽過囉！把機會留給別人吧！</p>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！</p>
+                <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem' }}>
+                  🎁 抽獎去！
+                </button>
+              </>
+            )}
+            
             <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
               本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
               We reserve the right to modify, interpret, or cancel this promotion at any time.
             </div>
-            <button className={`${styles.btn} ${styles.btnOutline}`} onClick={handleClose}>
-              關閉畫面
-            </button>
           </div>
         )}
       </div>
