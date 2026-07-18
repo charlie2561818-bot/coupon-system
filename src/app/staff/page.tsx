@@ -176,7 +176,7 @@ export default function StaffScannerPage() {
         )}
 
         {result && (
-          <div className={`${styles.resultAlert} ${result.type === 'success' ? styles.resultSuccess : styles.resultError} animate-fade-in`}>
+          <div className={`${styles.resultAlert} ${result.type === 'success' ? styles.resultSuccess : styles.resultError}`}>
             {result.type === 'success' ? <CheckCircle size={32} /> : <XCircle size={32} />}
             <div className={styles.resultText}>
               <div className={styles.resultTitle}>{result.message}</div>
