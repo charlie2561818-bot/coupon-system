@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QrCode, X, Check, Send } from 'lucide-react';
 import QRCodeDisplay from './QRCodeDisplay';
 
@@ -23,6 +23,27 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
   const [currentPage, setCurrentPage] = useState(1);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const itemsPerPage = 10;
+
+  // Sync with server data on soft refreshes
+  useEffect(() => {
+    setCodes(initialCodes);
+  }, [initialCodes]);
+
+  // Restore page from sessionStorage
+  useEffect(() => {
+    const savedPage = sessionStorage.getItem(`coupon_page_${title}`);
+    if (savedPage) {
+      setCurrentPage(parseInt(savedPage, 10));
+    }
+  }, [title]);
+
+  const handlePageChange = (updater: (prev: number) => number) => {
+    setCurrentPage(prev => {
+      const next = updater(prev);
+      sessionStorage.setItem(`coupon_page_${title}`, next.toString());
+      return next;
+    });
+  };
 
   const totalPages = Math.ceil(codes.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -124,8 +145,8 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
           <button 
             className="btn btn-outline" 
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
+            onClick={() => handlePageChange(p => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}
           >
             上一頁
           </button>
@@ -134,8 +155,8 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
           </span>
           <button 
             className="btn btn-outline" 
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}
           >
             下一頁
           </button>
