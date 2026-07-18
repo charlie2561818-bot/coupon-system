@@ -10,24 +10,29 @@ export default function BlindboxPage() {
   const [phase, setPhase] = useState<Phase>('IDLE');
   const [showFlash, setShowFlash] = useState(false);
   
-  // 模擬抽中的中獎資料
-  const [mockPrize, setMockPrize] = useState({
-    title: '免費霜淇淋兌換券',
-    englishTitle: 'Free Ice Cream Voucher',
-    code: 'BLIND-BOX-WINNER-001',
-  });
+  const [result, setResult] = useState<any>(null);
   const [qrValue, setQrValue] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setQrValue(`${window.location.origin}/c/${mockPrize.code}`);
+    if (typeof window !== 'undefined' && result?.code) {
+      setQrValue(`${window.location.origin}/c/${result.code}`);
     }
-  }, [mockPrize.code]);
+  }, [result?.code]);
 
-  const handleStartDraw = () => {
+  const handleStartDraw = async () => {
     setPhase('PLAYING');
+    setResult(null);
 
-    // 在 10 秒時，剛好是影片播完、茶杯摔破的瞬間
+    // 1. 在背景立刻發送抽獎請求
+    fetch('/api/blindbox', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => setResult(data))
+      .catch(err => {
+        console.error(err);
+        setResult({ success: false, message: '網路連線異常，請稍後再試。' });
+      });
+
+    // 2. 在 10 秒時，剛好是影片播完、茶杯摔破的瞬間
     setTimeout(() => {
       setShowFlash(true); // 觸發碎裂閃光特效
       setPhase('REVEAL'); // 切換到揭曉畫面
@@ -35,6 +40,11 @@ export default function BlindboxPage() {
       // 閃光特效持續一下後移除
       setTimeout(() => setShowFlash(false), 500);
     }, 10000);
+  };
+
+  const handleReset = () => {
+    setPhase('IDLE');
+    setResult(null);
   };
 
   return (
@@ -77,29 +87,55 @@ export default function BlindboxPage() {
 
       {phase === 'REVEAL' && (
         <div className={styles.resultContainer}>
-          <h2 className={styles.prizeTitle}>🎉 恭喜中獎！</h2>
-          <p className={styles.prizeSubtitle}>您獲得了：</p>
-          
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.8rem', color: '#2c3e2e', margin: '0 0 0.5rem 0' }}>{mockPrize.title}</h3>
-            <div style={{ color: '#666', fontSize: '1.1rem' }}>{mockPrize.englishTitle}</div>
-          </div>
+          {result && result.success ? (
+            <>
+              <h2 className={styles.prizeTitle}>🎉 恭喜中獎！</h2>
+              <p className={styles.prizeSubtitle}>您獲得了：</p>
+              
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.8rem', color: '#2c3e2e', margin: '0 0 0.5rem 0' }}>{result.couponTitle}</h3>
+                <div style={{ color: '#666', fontSize: '1.1rem' }}>{result.couponEnglishTitle}</div>
+              </div>
 
-          <div className={styles.qrWrapper}>
-            <QRCodeCanvas 
-              value={qrValue}
-              size={220}
-              level={"H"}
-              includeMargin={true}
-              bgColor={"#ffffff"}
-              fgColor={"#2c3e2e"}
-            />
-          </div>
+              <div className={styles.qrWrapper}>
+                <QRCodeCanvas 
+                  value={qrValue}
+                  size={220}
+                  level={"H"}
+                  includeMargin={true}
+                  bgColor={"#ffffff"}
+                  fgColor={"#2c3e2e"}
+                />
+              </div>
 
-          <div className={styles.codeBox}>
-            <div className={styles.codeLabel}>專屬序號</div>
-            <div className={styles.codeValue}>{mockPrize.code}</div>
-          </div>
+              <div className={styles.codeBox}>
+                <div className={styles.codeLabel}>專屬序號</div>
+                <div className={styles.codeValue}>{result.code}</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className={styles.prizeTitle} style={{ color: '#ef4444' }}>😅 哎呀！</h2>
+              <p className={styles.prizeSubtitle}>{result?.message || '抽獎失敗，請稍後再試。'}</p>
+            </>
+          )}
+
+          <button 
+            onClick={handleReset} 
+            style={{ 
+              marginTop: '2rem', 
+              padding: '0.75rem 2rem', 
+              fontSize: '1.1rem', 
+              borderRadius: '9999px', 
+              border: 'none', 
+              background: '#e5e7eb', 
+              color: '#374151',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+          >
+            完成 / 換下一位
+          </button>
         </div>
       )}
     </div>
