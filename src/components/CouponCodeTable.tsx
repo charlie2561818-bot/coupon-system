@@ -40,13 +40,20 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
     const savedScroll = sessionStorage.getItem(`coupon_scroll_${title}`);
     if (savedScroll) {
       setTimeout(() => {
-        window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+        const scrollContainer = document.querySelector('main');
+        if (scrollContainer) {
+          scrollContainer.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+        } else {
+          window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+        }
       }, 100);
     }
 
     // Save scroll position before reload
     const handleBeforeUnload = () => {
-      sessionStorage.setItem(`coupon_scroll_${title}`, window.scrollY.toString());
+      const scrollContainer = document.querySelector('main');
+      const scrollY = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
+      sessionStorage.setItem(`coupon_scroll_${title}`, scrollY.toString());
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
