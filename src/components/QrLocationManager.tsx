@@ -150,6 +150,7 @@ export default function QrLocationManager() {
             border: '1px solid var(--border-color)',
             fontSize: '0.9rem',
             background: 'var(--bg-color)',
+            color: 'var(--text-primary)',
           }}
         />
         <button
@@ -224,7 +225,8 @@ export default function QrLocationManager() {
                     borderRadius: '8px',
                     border: '1px solid var(--border-color)',
                     fontSize: '0.85rem',
-                    background: 'white',
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-primary)',
                   }}
                 >
                   <option value="">❌ 不綁定任何活動</option>
