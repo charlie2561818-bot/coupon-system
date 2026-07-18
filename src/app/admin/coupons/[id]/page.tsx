@@ -8,6 +8,8 @@ import DirectSendButton from '@/components/DirectSendButton';
 import CopyWebLinkButton from '@/components/CopyWebLinkButton';
 import styles from './detail.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CouponDetailPage({
   params,
 }: {

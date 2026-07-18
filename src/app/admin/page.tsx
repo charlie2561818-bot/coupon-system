@@ -5,6 +5,8 @@ import DeleteCouponButton from '@/components/DeleteCouponButton';
 import QrLocationManager from '@/components/QrLocationManager';
 import styles from './admin.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   // Fetch stats and recent coupons
   const totalCoupons = await prisma.coupon.count();

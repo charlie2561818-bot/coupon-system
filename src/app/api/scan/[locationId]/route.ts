@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 // GET: 取得立牌位置資訊與綁定狀態
 export async function GET(request: NextRequest, { params }: { params: Promise<{ locationId: string }> }) {
   try {
