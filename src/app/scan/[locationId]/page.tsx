@@ -188,7 +188,7 @@ export default function ScanPage() {
       {/* ===== 已領取過（防重刷） ===== */}
       {pageState === 'BLOCKED' && (
         <div className={styles.blockedContainer}>
-          <div className={styles.blockedIcon}>🎫</div>
+          <div className={styles.blockedIcon}>🎁</div>
           <h2 className={styles.blockedTitle}>
             您已經領取過本次活動的專屬好禮囉！
           </h2>
