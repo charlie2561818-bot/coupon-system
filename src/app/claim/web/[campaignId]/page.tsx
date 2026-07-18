@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useParams } from 'next/navigation';
 // Using the same styles as LIFF for consistency
@@ -28,6 +28,17 @@ export default function WebClaimPage() {
   
   const [hasDrawn, setHasDrawn] = useState(false);
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const winAudioRef = useRef<HTMLAudioElement | null>(null);
+  const loseAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      winAudioRef.current = new window.Audio('/win-sound.mp3');
+      loseAudioRef.current = new window.Audio('/lose-sound.mp3');
+    }
+  }, []);
+
   useEffect(() => {
     if (result?.code && typeof window !== 'undefined') {
       setQrValue(`${window.location.origin}/c/${result.code}`);
@@ -45,6 +56,11 @@ export default function WebClaimPage() {
   }, [campaignId]);
 
   const claimCoupon = async () => {
+    // 透過觸發一次空操作或預載媒體來解鎖 Audio/Video
+    videoRef.current?.load();
+    winAudioRef.current?.load();
+    loseAudioRef.current?.load();
+
     setPhase('FETCHING');
     
     fetch(`/api/claim/web/${campaignId}`, {
@@ -57,6 +73,10 @@ export default function WebClaimPage() {
         if (data.campaignId) {
           localStorage.setItem(`hasDrawn_${campaignId}`, 'true');
         }
+        if (videoRef.current) {
+          videoRef.current.src = data.won ? "/win-animation.mp4" : "/lose-animation.mp4";
+          videoRef.current.play().catch(e => console.error("Video play blocked:", e));
+        }
         setPhase('PLAYING');
       })
       .catch(err => {
@@ -68,9 +88,11 @@ export default function WebClaimPage() {
 
   const handleVideoEnded = () => {
     if (result && result.success) {
-      const audioUrl = result.won ? '/win-sound.mp3' : '/lose-sound.mp3';
-      const audio = new window.Audio(audioUrl);
-      audio.play().catch(e => console.error('Audio play failed:', e));
+      const audio = result.won ? winAudioRef.current : loseAudioRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => console.error('Audio play failed:', e));
+      }
       
       if (!result.won) {
         setShowFlash(true);
@@ -92,15 +114,7 @@ export default function WebClaimPage() {
             <p className={styles.instructions}>正在為您開獎...<br/>(Drawing...)</p>
           </div>
         ) : phase === 'PLAYING' ? (
-          <div className={styles.videoContainer}>
-            <video 
-              src={result?.won ? "/win-animation.mp4" : "/lose-animation.mp4"} 
-              autoPlay 
-              playsInline 
-              onEnded={handleVideoEnded}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
-            />
-          </div>
+          <></>
         ) : phase === 'IDLE' ? (
           <div className={styles.successWrapper}>
             <h1 className={styles.title}>專屬優惠抽獎</h1>
@@ -199,6 +213,27 @@ export default function WebClaimPage() {
             
           </div>
         )}
+      </div>
+
+      <div 
+        className={styles.videoContainer}
+        style={{ 
+          opacity: phase === 'PLAYING' ? 1 : 0, 
+          pointerEvents: phase === 'PLAYING' ? 'auto' : 'none',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: phase === 'PLAYING' ? 9999 : -1
+        }}
+      >
+        <video 
+          ref={videoRef}
+          playsInline 
+          onEnded={handleVideoEnded}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: 'black' }}
+        />
       </div>
     </div>
   );

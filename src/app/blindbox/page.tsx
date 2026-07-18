@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import styles from './blindbox.module.css';
 
@@ -13,6 +13,17 @@ export default function BlindboxPage() {
   const [result, setResult] = useState<any>(null);
   const [qrValue, setQrValue] = useState('');
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const winAudioRef = useRef<HTMLAudioElement | null>(null);
+  const loseAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      winAudioRef.current = new window.Audio('/win-sound.mp3');
+      loseAudioRef.current = new window.Audio('/lose-sound.mp3');
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && result?.code) {
       setQrValue(`${window.location.origin}/c/${result.code}`);
@@ -20,6 +31,20 @@ export default function BlindboxPage() {
   }, [result?.code]);
 
   const handleStartDraw = async () => {
+    // 0. 同步解鎖 iOS/Mobile Safari 的媒體播放限制
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+      videoRef.current.pause();
+    }
+    if (winAudioRef.current) {
+      winAudioRef.current.play().catch(() => {});
+      winAudioRef.current.pause();
+    }
+    if (loseAudioRef.current) {
+      loseAudioRef.current.play().catch(() => {});
+      loseAudioRef.current.pause();
+    }
+
     setPhase('FETCHING');
     setResult(null);
 
@@ -28,6 +53,10 @@ export default function BlindboxPage() {
       .then(res => res.json())
       .then(data => {
         setResult(data);
+        if (videoRef.current) {
+          videoRef.current.src = data.won ? "/win-animation.mp4" : "/lose-animation.mp4";
+          videoRef.current.play().catch(e => console.error("Video play blocked:", e));
+        }
         // 2. 取得結果後，進入 PLAYING 狀態開始播放對應的影片
         setPhase('PLAYING');
       })
@@ -41,9 +70,11 @@ export default function BlindboxPage() {
   const handleVideoEnded = () => {
     // 根據抽獎結果播放對應音效
     if (result && result.success) {
-      const audioUrl = result.won ? '/win-sound.mp3' : '/lose-sound.mp3';
-      const audio = new window.Audio(audioUrl);
-      audio.play().catch(e => console.error('Audio play failed:', e));
+      const audio = result.won ? winAudioRef.current : loseAudioRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => console.error('Audio play failed:', e));
+      }
       
       // 未中獎（摔破茶杯）時，保留碎裂閃光特效
       if (!result.won) {
@@ -90,18 +121,22 @@ export default function BlindboxPage() {
         </div>
       )}
 
-      {phase === 'PLAYING' && (
-        <div className={styles.videoContainer}>
-          {/* 根據結果動態載入對應的影片 */}
-          <video 
-            src={result?.won ? "/win-animation.mp4" : "/lose-animation.mp4"} 
-            autoPlay 
-            playsInline 
-            onEnded={handleVideoEnded}
-            style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
-          />
-        </div>
-      )}
+      {/* 提早渲染 Video，確保解鎖與播放不受阻礙 */}
+      <div 
+        className={styles.videoContainer}
+        style={{ 
+          opacity: phase === 'PLAYING' ? 1 : 0, 
+          pointerEvents: phase === 'PLAYING' ? 'auto' : 'none',
+          zIndex: phase === 'PLAYING' ? 9999 : -1
+        }}
+      >
+        <video 
+          ref={videoRef}
+          playsInline 
+          onEnded={handleVideoEnded}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', top: 0, left: 0, zIndex: 1, backgroundColor: 'black' }}
+        />
+      </div>
 
       {phase === 'REVEAL' && (
         <div className={styles.resultContainer}>
