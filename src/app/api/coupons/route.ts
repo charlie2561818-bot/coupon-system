@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       return `CPN-${result}`;
     };
 
-    let codesData = [];
+    const codesData = [];
     
     if (mode === 'SINGLE_USE') {
       // 產生 N 張，每張 maxUsage = 1

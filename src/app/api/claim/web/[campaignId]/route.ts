@@ -9,7 +9,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       where: { id: campaignId }
     });
 
-    if (!campaign || campaign.status !== 'ACTIVE' || campaign.mode !== 'SINGLE_USE') {
+    if (!campaign || campaign.status !== 'ACTIVE') {
       return NextResponse.json({ success: false, message: '此活動不存在或已結束。 (This campaign does not exist or has ended.)' });
     }
 
@@ -32,15 +32,35 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       });
     }
 
-    // 中獎了，找出一張未發送且未核銷的序號 (Web版不綁定 claimedBy，純粹標記 isDistributed)
-    const availableCode = await prisma.couponCode.findFirst({
-      where: {
-        couponId: campaignId,
-        isDistributed: false,
-        redeemedQuantity: 0,
-        claimedBy: null
+    let availableCode: any = null;
+
+    if (campaign.mode === 'SINGLE_USE') {
+      // 中獎了，找出一張未發送且未核銷的序號 (Web版不綁定 claimedBy，純粹標記 isDistributed)
+      availableCode = await prisma.couponCode.findFirst({
+        where: {
+          couponId: campaignId,
+          isDistributed: false,
+          redeemedQuantity: 0,
+          claimedBy: null
+        }
+      });
+
+      if (availableCode) {
+        // 把這張序號標記為已發送
+        await prisma.couponCode.update({
+          where: { id: availableCode.id },
+          data: { isDistributed: true }
+        });
       }
-    });
+    } else {
+      // MULTI_USE
+      availableCode = await prisma.couponCode.findFirst({
+        where: { couponId: campaignId }
+      });
+      if (availableCode && availableCode.redeemedQuantity >= availableCode.maxUsage) {
+        availableCode = null;
+      }
+    }
 
     if (!availableCode) {
       return NextResponse.json({ 
@@ -50,18 +70,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       });
     }
 
-    // 把這張序號標記為已發送
-    const updatedCode = await prisma.couponCode.update({
-      where: { id: availableCode.id },
-      data: {
-        isDistributed: true
-      }
-    });
-
     return NextResponse.json({
       success: true,
       won: true,
-      code: updatedCode.code,
+      campaignId,
+      code: availableCode.code,
       couponTitle: campaign.title,
       couponEnglishTitle: campaign.englishTitle,
       message: `恭喜中獎！這是您的專屬優惠碼！`

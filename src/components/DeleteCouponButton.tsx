@@ -37,8 +37,9 @@ export default function DeleteCouponButton({ id, title, isIconOnly = false, onDe
         router.push('/admin');
         router.refresh();
       }
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      alert(errMsg);
       setIsDeleting(false);
     }
   };

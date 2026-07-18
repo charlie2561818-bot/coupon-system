@@ -67,12 +67,8 @@ export default async function CouponDetailPage({
           </div>
         </div>
         <div className={styles.headerActions}>
-          {coupon.mode === 'SINGLE_USE' && (
-            <>
-              <CopyWebLinkButton campaignId={coupon.id} />
-              <DirectSendButton couponId={coupon.id} />
-            </>
-          )}
+          <CopyWebLinkButton campaignId={coupon.id} />
+          <DirectSendButton couponId={coupon.id} />
           <Link href={`/admin/coupons/${coupon.id}/edit`} className="btn btn-outline">
             <Edit size={20} />
             編輯
