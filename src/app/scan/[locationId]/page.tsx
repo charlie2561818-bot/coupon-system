@@ -204,20 +204,19 @@ export default function ScanPage() {
       {/* ===== 準備抽獎 ===== */}
       {pageState === 'IDLE' && locationInfo && (
         <div className={styles.idleWrapper}>
+          <div style={{ marginBottom: '1rem' }}>
+            <img 
+              src="/logo-teacloud.png" 
+              alt="茶雲居 Logo" 
+              style={{ width: '80px', height: 'auto', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+            />
+          </div>
           <h1 className={styles.title}>
-            {locationInfo.status === 'BLINDBOX' ? '🎁 驚喜盲盒' : '🎋 專屬優惠'}
+            {locationInfo.status === 'BLINDBOX' ? '🎁 驚喜盲盒' : '茶雲居專屬優惠'}
             <span style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'normal', marginTop: '0.5rem', opacity: 0.8 }}>
               {locationInfo.status === 'BLINDBOX' ? 'Mystery Blind Box' : 'Exclusive Offer'}
             </span>
           </h1>
-          {locationInfo.campaignTitle && locationInfo.status === 'SINGLE_ITEM' && (
-            <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
-              <h2 style={{ fontSize: '1.4rem', color: '#2c3e2e', margin: 0 }}>{locationInfo.campaignTitle}</h2>
-              {locationInfo.campaignEnglishTitle && (
-                <p style={{ fontSize: '1rem', color: '#888', margin: '0.25rem 0 0' }}>{locationInfo.campaignEnglishTitle}</p>
-              )}
-            </div>
-          )}
           <p style={{ fontSize: '1.2rem', color: '#666', textAlign: 'center', lineHeight: '1.6' }}>
             試試手氣，看看今天老闆準備了什麼驚喜！<br/>
             <span style={{ fontSize: '1rem', opacity: 0.8 }}>(Test your luck and see what surprise the boss prepared today!)</span>
