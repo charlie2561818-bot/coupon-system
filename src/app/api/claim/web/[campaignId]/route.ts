@@ -27,6 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({
         success: true,
         won: false,
+        campaignId,
         message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!availableCode) {
       return NextResponse.json({ 
         success: false, 
+        campaignId,
         message: '太熱烈了！本次活動的優惠券已經全數發送完畢。 (All coupons for this campaign have been claimed!)' 
       });
     }
