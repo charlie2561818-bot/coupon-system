@@ -123,7 +123,7 @@ export default function LiffClaimPage() {
           <div className={styles.loadingWrapper}>
             <div className={styles.spinner}></div>
             <p className={styles.instructions}>
-              {isInitializing ? '正在準備抽獎系統...' : '正在為您開獎...'}
+              {isInitializing ? '正在準備抽獎系統 (Preparing the system...)' : '正在為您開獎 (Drawing for you...)'}
             </p>
           </div>
         ) : liffError ? (

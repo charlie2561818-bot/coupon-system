@@ -15,7 +15,7 @@ export async function GET() {
     });
 
     if (!activeCampaign) {
-      return NextResponse.json({ success: false, message: '目前沒有進行中的活動' });
+      return NextResponse.json({ success: false, message: '目前沒有進行中的活動 (No active campaigns at the moment)' });
     }
 
     return NextResponse.json({ 

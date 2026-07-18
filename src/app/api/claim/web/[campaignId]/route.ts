@@ -10,12 +10,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
 
     if (!campaign || campaign.status !== 'ACTIVE' || campaign.mode !== 'SINGLE_USE') {
-      return NextResponse.json({ success: false, message: '此活動不存在或已結束。' });
+      return NextResponse.json({ success: false, message: '此活動不存在或已結束。 (This campaign does not exist or has ended.)' });
     }
 
     const now = new Date();
     if (now < campaign.validFrom || now > campaign.validUntil) {
-      return NextResponse.json({ success: false, message: '非活動期間，無法參與抽獎。' });
+      return NextResponse.json({ success: false, message: '非活動期間，無法參與抽獎。 (This campaign is currently inactive or has expired.)' });
     }
 
     // 隨機抽獎邏輯
