@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!availableCode) {
       return NextResponse.json({ 
         success: false, 
-        message: '太熱烈了！本次活動的專屬優惠券已經全數發送完畢。' 
+        message: '太熱烈了！本次活動的優惠券已經全數發送完畢。 (All coupons for this campaign have been claimed!)' 
       });
     }
 
