@@ -27,15 +27,14 @@ export default function BlindboxPage() {
   const handleStartDraw = () => {
     setPhase('PLAYING');
 
-    // 模擬 3.5 秒的影片播放時間
-    // 在 3.5 秒時，剛好是茶杯摔破的瞬間
+    // 在 10 秒時，剛好是影片播完、茶杯摔破的瞬間
     setTimeout(() => {
       setShowFlash(true); // 觸發碎裂閃光特效
       setPhase('REVEAL'); // 切換到揭曉畫面
       
       // 閃光特效持續一下後移除
       setTimeout(() => setShowFlash(false), 500);
-    }, 3500);
+    }, 10000);
   };
 
   return (
