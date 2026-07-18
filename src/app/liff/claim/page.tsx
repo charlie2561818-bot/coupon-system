@@ -149,12 +149,22 @@ export default function LiffClaimPage() {
               <div className={styles.codeValue}>{result.code}</div>
             </div>
             
-            <p className={styles.instructions}>
-              請在結帳時出示此畫面，或主動告知店員此序號以進行核銷。<br/>
-              <span style={{ fontSize: '0.8rem', color: '#999', display: 'block', marginTop: '1rem' }}>
+            <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>本優惠適用於現場結帳與線上客服（LINE/FB/IG）。</strong><br/>
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Valid for in-store and online messages (LINE/FB/IG).)</span><br/><br/>
+              <strong>現場結帳：</strong>請於結帳時向服務人員出示此畫面。<br/>
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(In-store: Please present this screen to our staff at checkout.)</span><br/><br/>
+              <strong>線上客服：</strong>請截圖此畫面或提供上方的『優惠代碼』傳送給我們。<br/>
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Online: Please send a screenshot of this page or the Promo Code to us via message.)</span>
+              <span style={{ fontSize: '0.8rem', color: '#999', display: 'block', marginTop: '1rem', textAlign: 'center' }}>
                 {result.message}
               </span>
-            </p>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
+              本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
+              We reserve the right to modify, interpret, or cancel this promotion at any time.
+            </div>
             
             <button className={styles.btn} onClick={handleClose}>
               關閉畫面
@@ -164,6 +174,10 @@ export default function LiffClaimPage() {
           <div className={styles.successWrapper}>
             <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
               <p>{result?.message || '優惠券發送完畢或活動已結束。'}</p>
+            </div>
+            <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#6b7280', lineHeight: '1.6', opacity: 0.9 }}>
+              本公司保有最終修改、變更、活動解釋及取消本優惠之權利。<br/>
+              We reserve the right to modify, interpret, or cancel this promotion at any time.
             </div>
             <button className={`${styles.btn} ${styles.btnOutline}`} onClick={handleClose}>
               關閉畫面
