@@ -29,12 +29,30 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
     setCodes(initialCodes);
   }, [initialCodes]);
 
-  // Restore page from sessionStorage
+  // Restore page and scroll position from sessionStorage
   useEffect(() => {
     const savedPage = sessionStorage.getItem(`coupon_page_${title}`);
     if (savedPage) {
       setCurrentPage(parseInt(savedPage, 10));
     }
+
+    // Restore scroll position after DOM updates
+    const savedScroll = sessionStorage.getItem(`coupon_scroll_${title}`);
+    if (savedScroll) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+      }, 100);
+    }
+
+    // Save scroll position before reload
+    const handleBeforeUnload = () => {
+      sessionStorage.setItem(`coupon_scroll_${title}`, window.scrollY.toString());
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [title]);
 
   const handlePageChange = (updater: (prev: number) => number) => {
