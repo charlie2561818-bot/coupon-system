@@ -66,13 +66,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // 綁定特定活動
     const campaign = await prisma.coupon.findUnique({
-      where: { id: location.activeCampaignId },
-      include: {
-        codes: {
-          where: { isDistributed: false },
-          take: 1,
-        }
-      }
+      where: { id: location.activeCampaignId }
     });
 
     if (!campaign || campaign.status !== 'ACTIVE') {
@@ -94,7 +88,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       });
     }
 
-    if (campaign.codes.length === 0) {
+    let isAvailable = false;
+    if (campaign.mode === 'SINGLE_USE') {
+      const availableCode = await prisma.couponCode.findFirst({
+        where: { couponId: campaign.id, isDistributed: false }
+      });
+      isAvailable = !!availableCode;
+    } else {
+      const multiCode = await prisma.couponCode.findFirst({
+        where: { couponId: campaign.id }
+      });
+      isAvailable = multiCode ? (multiCode.redeemedQuantity < multiCode.maxUsage) : false;
+    }
+
+    if (!isAvailable) {
       return NextResponse.json({ 
         success: true, 
         status: 'EMPTY', 
@@ -196,20 +203,33 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // ===== 單品模式 =====
     const campaign = await prisma.coupon.findUnique({
-      where: { id: location.activeCampaignId },
-      include: {
-        codes: {
-          where: {
-            isDistributed: false,
-            redeemedQuantity: 0,
-            claimedBy: null,
-          },
-          take: 1,
-        }
-      }
+      where: { id: location.activeCampaignId }
     });
 
-    if (!campaign || campaign.status !== 'ACTIVE' || campaign.codes.length === 0) {
+    if (!campaign || campaign.status !== 'ACTIVE') {
+      return NextResponse.json({ success: false, won: false, message: '此活動不存在或已結束。' });
+    }
+
+    let selectedCode: any = null;
+    if (campaign.mode === 'SINGLE_USE') {
+      selectedCode = await prisma.couponCode.findFirst({
+        where: {
+          couponId: campaign.id,
+          isDistributed: false,
+          redeemedQuantity: 0,
+          claimedBy: null
+        }
+      });
+    } else {
+      selectedCode = await prisma.couponCode.findFirst({
+        where: { couponId: campaign.id }
+      });
+      if (selectedCode && selectedCode.redeemedQuantity >= selectedCode.maxUsage) {
+        selectedCode = null; // Mark as unavailable
+      }
+    }
+
+    if (!selectedCode) {
       return NextResponse.json({ success: false, won: false, message: '本活動優惠券已全數發送完畢。' });
     }
 
@@ -227,8 +247,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       });
     }
 
-    const selectedCode = campaign.codes[0];
-
+    // 對於一碼多用，也將 isDistributed 設為 true 讓後台顯示「已發出」
     await prisma.couponCode.update({
       where: { id: selectedCode.id },
       data: { isDistributed: true },
