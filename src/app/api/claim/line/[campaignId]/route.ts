@@ -96,7 +96,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       couponEnglishTitle: campaign.englishTitle,
       showInCart: campaign.showInCart,
       isDraw: campaign.isDraw,
-      message: `嗨 ${displayName || '好友'}，恭喜中獎！這是您的專屬優惠碼！`
+      message: campaign.usageRules || (campaign.isDraw 
+        ? '恭喜中獎！請向櫃檯人員出示此畫面。 (Congratulations! Please present this screen to our staff.)' 
+        : '領取成功！請向櫃檯人員出示此畫面。 (Successfully claimed! Please present this screen to our staff.)')
     });
 
   } catch (error) {
