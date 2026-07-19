@@ -60,7 +60,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         success: true, 
         status: 'BLINDBOX', 
         locationName: location.name,
-        campaignId: 'BLINDBOX' 
+        campaignId: 'BLINDBOX',
+        showInCart: true 
       });
     }
 
@@ -117,6 +118,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       campaignId: campaign.id,
       campaignTitle: campaign.title,
       campaignEnglishTitle: campaign.englishTitle,
+      showInCart: campaign.showInCart
     });
 
   } catch (error) {
@@ -197,6 +199,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         couponEnglishTitle: selectedCampaign.englishTitle,
         code: selectedCode.code,
         campaignId: selectedCampaign.id,
+        showInCart: selectedCampaign.showInCart,
         message: selectedCampaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
       });
     }
@@ -260,6 +263,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       couponEnglishTitle: campaign.englishTitle,
       code: selectedCode.code,
       campaignId: campaign.id,
+      showInCart: campaign.showInCart,
       message: campaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
     });
 
