@@ -139,13 +139,17 @@ export default function WebClaimPage() {
           <></>
         ) : phase === 'IDLE' ? (
           <div className={styles.successWrapper}>
-            <h1 className={styles.title}>專屬優惠抽獎</h1>
-            <p className={styles.subtitle}>幸運輪盤，試試手氣！</p>
+            <h1 className={styles.title}>
+              {isInitializing ? '專屬優惠活動' : (isDraw ? '專屬優惠抽獎' : '專屬優惠領取')}
+            </h1>
+            <p className={styles.subtitle}>
+              {isInitializing ? '即將為您呈現專屬優惠' : (isDraw ? '幸運輪盤，試試手氣！' : '專屬回饋，即刻領取！')}
+            </p>
             
             {isInitializing ? (
               <div className={styles.loadingWrapper}>
                 <div className={styles.spinner}></div>
-                <p className={styles.instructions}>正在準備抽獎系統...</p>
+                <p className={styles.instructions}>正在準備活動系統...</p>
               </div>
             ) : hasDrawn ? (
               <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>

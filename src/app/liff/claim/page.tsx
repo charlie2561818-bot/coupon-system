@@ -178,13 +178,15 @@ export default function LiffClaimPage() {
           <></>
         ) : phase === 'IDLE' ? (
           <div className={styles.successWrapper}>
-            <h1 className={styles.title}>專屬優惠抽獎</h1>
+            <h1 className={styles.title}>
+              {isInitializing ? '專屬優惠活動' : (isDraw ? '專屬優惠抽獎' : '專屬優惠領取')}
+            </h1>
             <p className={styles.subtitle}>LINE 官方帳號會員限定</p>
 
             {isInitializing ? (
               <div className={styles.loadingWrapper}>
                 <div className={styles.spinner}></div>
-                <p className={styles.instructions}>正在準備抽獎系統 (Preparing the system...)</p>
+                <p className={styles.instructions}>正在準備活動系統 (Preparing the system...)</p>
               </div>
             ) : liffError ? (
               <div className={styles.errorBox}>
