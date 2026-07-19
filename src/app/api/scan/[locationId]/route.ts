@@ -183,28 +183,83 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         });
       }
 
-      // 中獎了！隨機挑選一個活動
-      const randomIndex = Math.floor(Math.random() * availableCampaigns.length);
-      const selectedCampaign = availableCampaigns[randomIndex];
-      const selectedCode = selectedCampaign.codes[0];
+      // 中獎了！進入原子性更新迴圈（最多重試 3 次）
+      let updatedCode = null;
+      let finalSelectedCampaign = null;
 
-      await prisma.$transaction([
-        prisma.couponCode.update({
-          where: { id: selectedCode.id },
+      for (let i = 0; i < 3; i++) {
+        // 為了避免拿到已經過時的 candidate，每次迴圈重新檢查可用的活動
+        const currentActiveCampaigns = await prisma.coupon.findMany({
+          where: {
+            mode: 'SINGLE_USE',
+            status: 'ACTIVE',
+            validFrom: { lte: now },
+            validUntil: { gte: now },
+          },
+          include: {
+            codes: {
+              where: { isDistributed: false },
+              take: 1,
+            }
+          }
+        });
+        const currentAvailableCampaigns = currentActiveCampaigns.filter(c => c.codes.length > 0);
+        
+        if (currentAvailableCampaigns.length === 0) {
+          break; // 真的抽完了
+        }
+
+        const randomIndex = Math.floor(Math.random() * currentAvailableCampaigns.length);
+        const selectedCampaign = currentAvailableCampaigns[randomIndex];
+        const selectedCode = selectedCampaign.codes[0];
+
+        // 原子性更新
+        const updateResult = await prisma.couponCode.updateMany({
+          where: { 
+            id: selectedCode.id,
+            isDistributed: false
+          },
           data: { isDistributed: true },
-        }),
-      ]);
+        });
+
+        if (updateResult.count > 0) {
+          updatedCode = selectedCode;
+          finalSelectedCampaign = selectedCampaign;
+          break;
+        }
+      }
+
+      if (!updatedCode || !finalSelectedCampaign) {
+         // 檢查是否真的沒獎了
+         const stillAvailableCount = await prisma.couponCode.count({
+           where: {
+             isDistributed: false,
+             coupon: {
+               mode: 'SINGLE_USE',
+               status: 'ACTIVE',
+               validFrom: { lte: now },
+               validUntil: { gte: now },
+             }
+           }
+         });
+         
+         if (stillAvailableCount === 0) {
+           return NextResponse.json({ success: false, won: false, message: '目前所有獎項皆已抽完。' });
+         } else {
+           return NextResponse.json({ success: false, won: false, message: '目前領取人數過多，請稍後再試。' });
+         }
+      }
 
       return NextResponse.json({
         success: true,
         won: true,
-        couponTitle: selectedCampaign.title,
-        couponEnglishTitle: selectedCampaign.englishTitle,
-        code: selectedCode.code,
-        campaignId: selectedCampaign.id,
-        showInCart: selectedCampaign.showInCart,
+        couponTitle: finalSelectedCampaign.title,
+        couponEnglishTitle: finalSelectedCampaign.englishTitle,
+        code: updatedCode.code,
+        campaignId: finalSelectedCampaign.id,
+        showInCart: finalSelectedCampaign.showInCart,
         isDraw: true,
-        message: selectedCampaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
+        message: finalSelectedCampaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
       });
     }
 
@@ -219,14 +274,51 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     let selectedCode: any = null;
     if (campaign.mode === 'SINGLE_USE') {
-      selectedCode = await prisma.couponCode.findFirst({
-        where: {
-          couponId: campaign.id,
-          isDistributed: false,
-          redeemedQuantity: 0,
-          claimedBy: null
+      // 原子性更新迴圈
+      for (let i = 0; i < 3; i++) {
+        const candidateCode = await prisma.couponCode.findFirst({
+          where: {
+            couponId: campaign.id,
+            isDistributed: false,
+            redeemedQuantity: 0,
+            claimedBy: null
+          }
+        });
+
+        if (!candidateCode) {
+          break; // 真的沒有庫存了
         }
-      });
+
+        const updateResult = await prisma.couponCode.updateMany({
+          where: { 
+            id: candidateCode.id,
+            isDistributed: false
+          },
+          data: { isDistributed: true }
+        });
+
+        if (updateResult.count > 0) {
+          selectedCode = candidateCode;
+          break;
+        }
+      }
+      
+      if (!selectedCode) {
+        const remainingCount = await prisma.couponCode.count({
+          where: {
+            couponId: campaign.id,
+            isDistributed: false,
+            redeemedQuantity: 0,
+            claimedBy: null
+          }
+        });
+        if (remainingCount === 0) {
+          return NextResponse.json({ success: false, won: false, message: '本活動優惠券已全數發送完畢。' });
+        } else {
+          return NextResponse.json({ success: false, won: false, message: '目前領取人數過多，請稍後再試。' });
+        }
+      }
+
     } else {
       selectedCode = await prisma.couponCode.findFirst({
         where: { couponId: campaign.id }
@@ -234,10 +326,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (selectedCode && selectedCode.redeemedQuantity >= selectedCode.maxUsage) {
         selectedCode = null; // Mark as unavailable
       }
-    }
+      
+      if (!selectedCode) {
+        return NextResponse.json({ success: false, won: false, message: '本活動優惠券已全數發送完畢。' });
+      }
 
-    if (!selectedCode) {
-      return NextResponse.json({ success: false, won: false, message: '本活動優惠券已全數發送完畢。' });
+      // 對於一碼多用，也將 isDistributed 設為 true 讓後台顯示「已發出」
+      await prisma.couponCode.updateMany({
+        where: { id: selectedCode.id, isDistributed: false },
+        data: { isDistributed: true },
+      });
     }
 
     if (now < campaign.validFrom || now > campaign.validUntil) {
@@ -255,12 +353,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
-
-    // 對於一碼多用，也將 isDistributed 設為 true 讓後台顯示「已發出」
-    await prisma.couponCode.update({
-      where: { id: selectedCode.id },
-      data: { isDistributed: true },
-    });
 
     return NextResponse.json({
       success: true,

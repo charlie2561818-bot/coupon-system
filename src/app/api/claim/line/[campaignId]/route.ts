@@ -60,32 +60,67 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       });
     }
 
-    // 找出一張尚未發送且未被領取的序號
-    const availableCode = await prisma.couponCode.findFirst({
-      where: {
-        couponId: campaignId,
-        isDistributed: false,
-        redeemedQuantity: 0,
-        claimedBy: null
-      }
-    });
-
-    if (!availableCode) {
-      return NextResponse.json({ 
-        success: false, 
-        campaignId,
-        message: '太熱烈了！本次活動的優惠券已經全數發送完畢。 (All coupons for this campaign have been claimed!)' 
+    // 找出一張尚未發送且未被領取的序號，最多重試 3 次
+    let updatedCode = null;
+    for (let i = 0; i < 3; i++) {
+      const availableCode = await prisma.couponCode.findFirst({
+        where: {
+          couponId: campaignId,
+          isDistributed: false,
+          redeemedQuantity: 0,
+          claimedBy: null
+        }
       });
+
+      if (!availableCode) {
+        break; // 真的沒有庫存了
+      }
+
+      // 原子性更新：確保在這幾毫秒內沒有被其他人搶走
+      const updateResult = await prisma.couponCode.updateMany({
+        where: { 
+          id: availableCode.id,
+          isDistributed: false 
+        },
+        data: {
+          claimedBy: userId,
+          isDistributed: true
+        }
+      });
+
+      if (updateResult.count > 0) {
+        // 更新成功，成功搶到這張序號
+        updatedCode = availableCode;
+        break;
+      }
+      // 如果 count === 0，代表剛好被搶走，進入下一次迴圈重試
     }
 
-    // 把這張序號綁定給該名使用者，並標記已發送
-    const updatedCode = await prisma.couponCode.update({
-      where: { id: availableCode.id },
-      data: {
-        claimedBy: userId,
-        isDistributed: true
+    if (!updatedCode) {
+      // 檢查是否真的沒庫存，或是 3 次都剛好跟別人撞
+      const remainingCount = await prisma.couponCode.count({
+        where: {
+          couponId: campaignId,
+          isDistributed: false,
+          redeemedQuantity: 0,
+          claimedBy: null
+        }
+      });
+
+      if (remainingCount === 0) {
+        return NextResponse.json({ 
+          success: false, 
+          campaignId,
+          message: '太熱烈了！本次活動的優惠券已經全數發送完畢。 (All coupons for this campaign have been claimed!)' 
+        });
+      } else {
+        return NextResponse.json({ 
+          success: false, 
+          campaignId,
+          message: '目前領取人數過多，請稍後再試。 (The system is busy, please try again later.)' 
+        });
       }
-    });
+    }
 
     return NextResponse.json({
       success: true,

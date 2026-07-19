@@ -61,9 +61,17 @@ export async function POST(request: Request) {
     const staffId = (session.user as any).id;
 
     const result = await prisma.$transaction(async (tx) => {
-      // Re-verify quantity inside transaction to prevent race conditions
-      const currentCode = await tx.couponCode.findUnique({ where: { id: couponCode.id } });
-      if (!currentCode || currentCode.redeemedQuantity >= currentCode.maxUsage) {
+      // 原子操作：直接在更新時確保 redeemedQuantity < maxUsage，避免高併發下被超兌
+      const updateCodeResult = await tx.couponCode.updateMany({
+        where: { 
+          id: couponCode.id,
+          redeemedQuantity: { lt: couponCode.maxUsage } // 只有在還沒滿的情況下才能 +1
+        },
+        data: { redeemedQuantity: { increment: 1 } }
+      });
+
+      // 如果更新筆數是 0，代表剛剛在那毫秒內已經被兌換滿了
+      if (updateCodeResult.count === 0) {
         throw new Error("QUOTA_FULL");
       }
 
@@ -73,12 +81,6 @@ export async function POST(request: Request) {
           couponCodeId: couponCode.id,
           staffId: staffId,
         }
-      });
-
-      // Update couponCode quantity
-      await tx.couponCode.update({
-        where: { id: couponCode.id },
-        data: { redeemedQuantity: { increment: 1 } }
       });
 
       // Update parent coupon quantity
