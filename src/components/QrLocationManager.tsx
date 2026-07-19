@@ -199,20 +199,22 @@ export default function QrLocationManager() {
                   <QrCode size={18} style={{ color: 'var(--primary-color)' }} />
                   <strong style={{ fontSize: '1rem' }}>{loc.name}</strong>
                 </div>
-                <button
-                  onClick={() => handleDelete(loc.id, loc.name)}
-                  title="刪除立牌"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc2626',
-                    cursor: 'pointer',
-                    padding: '0.25rem',
-                    borderRadius: '4px',
-                  }}
-                >
-                  <Trash2 size={16} />
-                </button>
+                {loc.id !== 'LINE_LIFF' && (
+                  <button
+                    onClick={() => handleDelete(loc.id, loc.name)}
+                    title="刪除立牌"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#dc2626',
+                      cursor: 'pointer',
+                      padding: '0.25rem',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
 
               {/* 第二行：綁定下拉選單 */}
@@ -245,42 +247,49 @@ export default function QrLocationManager() {
               </div>
 
               {/* 第三行：固定網址 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <LinkIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
-                <code style={{
-                  fontSize: '0.8rem',
-                  color: 'var(--primary-color)',
-                  background: 'white',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid var(--border-color)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  flex: 1,
-                }}>
-                  {getQrUrl(loc.id)}
-                </code>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(getQrUrl(loc.id));
-                    showMessage('已複製網址！', 'success');
-                  }}
-                  title="複製網址"
-                  style={{
+              {loc.id === 'LINE_LIFF' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <LinkIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>此項目專門用來控制 LINE 官方帳號內的圖文選單。</span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <LinkIcon size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                  <code style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--primary-color)',
                     background: 'white',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '6px',
                     padding: '0.25rem 0.5rem',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    color: 'var(--text-secondary)',
-                    flexShrink: 0,
-                  }}
-                >
-                  複製
-                </button>
-              </div>
+                    borderRadius: '4px',
+                    border: '1px solid var(--border-color)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    flex: 1,
+                  }}>
+                    {getQrUrl(loc.id)}
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(getQrUrl(loc.id));
+                      showMessage('已複製網址！', 'success');
+                    }}
+                    title="複製網址"
+                    style={{
+                      background: 'white',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '6px',
+                      padding: '0.25rem 0.5rem',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-secondary)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    複製
+                  </button>
+                </div>
+              )}
 
               {/* 狀態標籤 */}
               <div style={{ marginTop: '0.75rem' }}>

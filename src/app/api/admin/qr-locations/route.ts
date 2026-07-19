@@ -20,9 +20,26 @@ export async function GET() {
       return NextResponse.json({ success: false, message: '權限不足' }, { status: 403 });
     }
 
+    // Ensure LINE_LIFF exists
+    let lineLiff = await prisma.qrLocation.findUnique({ where: { id: 'LINE_LIFF' } });
+    if (!lineLiff) {
+      lineLiff = await prisma.qrLocation.create({
+        data: {
+          id: 'LINE_LIFF',
+          name: '📱 LINE 官方帳號圖文選單',
+          updatedAt: new Date(),
+        }
+      });
+    }
+
     const locations = await prisma.qrLocation.findMany({
       orderBy: { createdAt: 'desc' }
     });
+    // Ensure LINE_LIFF is always at the top
+    const sortedLocations = [
+      locations.find(l => l.id === 'LINE_LIFF'),
+      ...locations.filter(l => l.id !== 'LINE_LIFF')
+    ].filter(Boolean);
 
     // 取得所有進行中的活動供下拉選單使用
     const now = new Date();
@@ -41,7 +58,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json({ success: true, locations, activeCampaigns });
+    return NextResponse.json({ success: true, locations: sortedLocations, activeCampaigns });
   } catch (error) {
     console.error('QR Locations GET Error:', error);
     return NextResponse.json({ success: false, message: '伺服器錯誤' }, { status: 500 });
@@ -115,6 +132,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ success: false, message: '缺少立牌 ID' });
+    }
+
+    if (id === 'LINE_LIFF') {
+      return NextResponse.json({ success: false, message: '無法刪除系統預設項目' });
     }
 
     await prisma.qrLocation.delete({
