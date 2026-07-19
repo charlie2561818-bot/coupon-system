@@ -6,7 +6,6 @@ export async function GET() {
     const now = new Date();
     const activeCampaign = await prisma.coupon.findFirst({
       where: {
-        mode: 'SINGLE_USE',
         status: 'ACTIVE',
         validFrom: { lte: now },
         validUntil: { gte: now },
