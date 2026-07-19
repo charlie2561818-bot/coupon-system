@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Gift, X } from 'lucide-react';
+import { Gift, X, Check, Copy } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
 interface DirectSendButtonProps {
@@ -12,6 +12,7 @@ export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
   const [isSending, setIsSending] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleDirectSend = async () => {
     setIsSending(true);
@@ -39,6 +40,20 @@ export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
   const closeModal = () => {
     setIsModalOpen(false);
     setGeneratedCode(null);
+    setIsCopied(false);
+  };
+
+  const handleCopyLink = async () => {
+    if (!generatedCode) return;
+    try {
+      const url = `${window.location.origin}/c/${generatedCode}`;
+      await navigator.clipboard.writeText(url);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      alert('複製失敗，請手動複製');
+    }
   };
 
   return (
@@ -113,10 +128,39 @@ export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
               fontSize: '1.2rem',
               fontWeight: 'bold',
               color: '#2c3e2e',
-              letterSpacing: '2px'
+              letterSpacing: '2px',
+              marginBottom: '1.5rem'
             }}>
               {generatedCode}
             </div>
+
+            <button 
+              onClick={handleCopyLink}
+              className="btn btn-outline"
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                width: '100%',
+                justifyContent: 'center',
+                backgroundColor: isCopied ? 'var(--success-color)' : 'transparent',
+                color: isCopied ? '#fff' : 'var(--primary-color)',
+                borderColor: isCopied ? 'var(--success-color)' : 'var(--primary-color)',
+                transition: 'all 0.2s ease-in-out'
+              }}
+            >
+              {isCopied ? (
+                <>
+                  <Check size={18} />
+                  已複製！(Copied!)
+                </>
+              ) : (
+                <>
+                  <Copy size={18} />
+                  複製專屬連結 (Copy Link)
+                </>
+              )}
+            </button>
             
             <p style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: '#999' }}>
               此序號已標記為發送，可直接由客人核銷。
