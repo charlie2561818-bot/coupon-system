@@ -211,7 +211,10 @@ export default function LiffClaimPage() {
               result.won ? (
                 <>
                   {result.alreadyClaimed ? (
-                    <p style={{ color: '#7a8b7a', marginBottom: '1rem' }}>您已經領取過此優惠囉！</p>
+                    <p style={{ color: '#7a8b7a', marginBottom: '1rem' }}>
+                      您已經領取過此優惠囉！<br/>
+                      <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(You have already claimed this promotion!)</span>
+                    </p>
                   ) : (
                     <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
                   )}

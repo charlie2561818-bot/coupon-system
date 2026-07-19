@@ -40,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         couponTitle: campaign.title,
         couponEnglishTitle: campaign.englishTitle,
         showInCart: campaign.showInCart,
-        message: '您已經領取過此活動的專屬序號囉！'
+        message: '您已經領取過此活動的專屬序號囉！ (You have already claimed a promo code for this campaign!)'
       });
     }
 
