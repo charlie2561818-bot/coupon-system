@@ -45,30 +45,67 @@ export async function POST() {
       });
     }
 
-    // 4. 若中獎，從可用的活動清單中「平均隨機」挑選一個
-    // (未來如果需要加入機率權重，可修改此處的挑選邏輯)
-    const randomIndex = Math.floor(Math.random() * availableCampaigns.length);
-    const selectedCampaign = availableCampaigns[randomIndex];
-    const selectedCode = selectedCampaign.codes[0];
+    // 4. 若中獎，從可用的活動清單中隨機挑選並使用原子性更新防衝突
+    let finalCode = null;
+    let finalCampaign = null;
 
-    // 5. 使用 Transaction 將該序號標記為已派發
-    await prisma.$transaction([
-      prisma.couponCode.update({
-        where: { id: selectedCode.id },
+    // 最多重試 3 次，避免被並發請求搶走
+    for (let i = 0; i < 3; i++) {
+      if (availableCampaigns.length === 0) break;
+
+      const randomIndex = Math.floor(Math.random() * availableCampaigns.length);
+      const candidateCampaign = availableCampaigns[randomIndex];
+
+      // 即時重新尋找該活動下真正可用的序號
+      const freshCode = await prisma.couponCode.findFirst({
+        where: {
+          couponId: candidateCampaign.id,
+          isDistributed: false,
+          redeemedQuantity: 0,
+          claimedBy: null
+        }
+      });
+
+      if (!freshCode) {
+        // 如果這個活動剛好沒票了，從清單中移除，換抽別的
+        availableCampaigns.splice(randomIndex, 1);
+        continue;
+      }
+
+      // 原子性更新：確保在此毫秒內沒人搶走
+      const updateResult = await prisma.couponCode.updateMany({
+        where: { 
+          id: freshCode.id, 
+          isDistributed: false 
+        },
         data: { isDistributed: true },
-      }),
-      // 注意：這裡先不增加 redeemedQuantity，那是核銷時才加的。
-    ]);
+      });
+
+      if (updateResult.count > 0) {
+        // 成功搶到這張序號
+        finalCode = freshCode;
+        finalCampaign = candidateCampaign;
+        break;
+      }
+      // 若 count === 0，代表剛剛好被搶走，進入下一圈重試
+    }
+
+    if (!finalCode || !finalCampaign) {
+      return NextResponse.json({ 
+        success: false, 
+        message: '太熱烈了！目前的獎項剛好被抽完，請稍後再試。 (The system is busy, please try again later.)' 
+      });
+    }
 
     // 6. 回傳抽中資訊
     return NextResponse.json({
       success: true,
       won: true,
-      couponTitle: selectedCampaign.title,
-      couponEnglishTitle: selectedCampaign.englishTitle,
-      code: selectedCode.code,
-      campaignId: selectedCampaign.id,
-      message: selectedCampaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
+      couponTitle: finalCampaign.title,
+      couponEnglishTitle: finalCampaign.englishTitle,
+      code: finalCode.code,
+      campaignId: finalCampaign.id,
+      message: finalCampaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
     });
 
   } catch (error) {

@@ -3,6 +3,35 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || (session.user as any).role !== 'ADMIN') {
+    return NextResponse.json({ error: "Forbidden. Admin access required." }, { status: 403 });
+  }
+
+  try {
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+
+    const coupon = await prisma.coupon.findUnique({
+      where: { id },
+    });
+
+    if (!coupon) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ coupon }, { status: 200 });
+  } catch (error) {
+    console.error("Failed to fetch coupon:", error);
+    return NextResponse.json({ error: "Failed to fetch coupon" }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

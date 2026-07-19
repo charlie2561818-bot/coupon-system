@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ export default function NewCouponPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isDuplicate, setIsDuplicate] = useState(false);
 
   // Form State
   const [mode, setMode] = useState('MULTI_USE'); // 'SINGLE_USE' or 'MULTI_USE'
@@ -25,6 +26,33 @@ export default function NewCouponPage() {
   const [discountValue, setDiscountValue] = useState('');
   const [showInCart, setShowInCart] = useState(true);
   const [isDraw, setIsDraw] = useState(true);
+
+  // 處理「一鍵複製」邏輯
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const duplicateFrom = searchParams.get('duplicateFrom');
+    if (duplicateFrom) {
+      setIsDuplicate(true);
+      fetch(`/api/coupons/${duplicateFrom}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.coupon) {
+            const c = data.coupon;
+            setMode(c.mode);
+            setTitle(c.title + ' (複製)');
+            setEnglishTitle(c.englishTitle || '');
+            setUsageRules(c.usageRules || '');
+            setApplicableBrand(c.applicableBrand);
+            setDiscountType(c.discountType);
+            setDiscountValue(c.discountValue.toString());
+            setShowInCart(c.showInCart);
+            setIsDraw(c.isDraw);
+            // validFrom, validUntil, totalQuantity 不帶入
+          }
+        })
+        .catch(err => console.error('Failed to fetch duplicate data:', err));
+    }
+  }, []);
 
   const generateRandomCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -59,7 +87,8 @@ export default function NewCouponPage() {
           discountType,
           discountValue: discountType === 'FREE_GIFT' ? 0 : parseFloat(discountValue),
           showInCart,
-          isDraw
+          isDraw,
+          status: isDuplicate ? 'PAUSED' : 'ACTIVE'
         }),
       });
 

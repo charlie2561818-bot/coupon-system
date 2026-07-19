@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import { PlusCircle, Ticket, CheckCircle, Clock, MapPin } from 'lucide-react';
+import { PlusCircle, Ticket, CheckCircle, Clock, MapPin, Copy } from 'lucide-react';
 import DeleteCouponButton from '@/components/DeleteCouponButton';
+import ToggleStatusButton from '@/components/ToggleStatusButton';
 import QrLocationManager from '@/components/QrLocationManager';
 import styles from './admin.module.css';
 
@@ -71,18 +72,15 @@ export default async function AdminDashboard() {
             <tbody>
               {coupons.map((coupon) => {
                 const now = new Date();
-                let status = '進行中';
-                let badgeClass = 'badge-success';
+                const isExpired = now > coupon.validUntil;
+                let textStatus = '';
                 
                 if (now < coupon.validFrom) {
-                  status = '未開始';
-                  badgeClass = 'badge-warning';
-                } else if (now > coupon.validUntil) {
-                  status = '已過期';
-                  badgeClass = 'badge-warning'; // normally danger, using warning for demo
-                } else if (coupon.redeemedQuantity >= coupon.totalQuantity) {
-                  status = '已使用';
-                  badgeClass = 'badge-warning';
+                  textStatus = '未開始';
+                } else if (isExpired) {
+                  textStatus = '已過期';
+                } else if (coupon.redeemedQuantity >= coupon.totalQuantity && coupon.mode === 'SINGLE_USE') {
+                  textStatus = '已兌換完畢';
                 }
 
                 return (
@@ -109,12 +107,19 @@ export default async function AdminDashboard() {
                       </div>
                     </td>
                     <td>
-                      <span className={`badge ${badgeClass}`}>{status}</span>
+                      {textStatus ? (
+                        <span className={`badge badge-warning`}>{textStatus}</span>
+                      ) : (
+                        <ToggleStatusButton id={coupon.id} currentStatus={coupon.status} isExpired={isExpired} />
+                      )}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         <Link href={`/admin/coupons/${coupon.id}`} className={styles.actionLink}>
                           檢視詳情
+                        </Link>
+                        <Link href={`/admin/coupons/new?duplicateFrom=${coupon.id}`} className={styles.actionLink} title="複製活動">
+                          <Copy size={16} />
                         </Link>
                         <DeleteCouponButton id={coupon.id} title={coupon.title} isIconOnly={true} />
                       </div>
