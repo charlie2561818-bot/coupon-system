@@ -308,30 +308,6 @@ export default function ScanPage() {
                   <div className={styles.codeLabel}>專屬序號 (Promo Code)</div>
                   <div className={styles.codeValue}>{result.code}</div>
                 </div>
-
-                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                  <a 
-                    href={`https://yuanfateaorder.netlify.app/?discount_code=${result.code}`}
-                    className={styles.resetBtn}
-                    style={{ 
-                      display: 'inline-flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      textDecoration: 'none', 
-                      background: '#5c6e5c', 
-                      color: '#fff',
-                      padding: '0.875rem 1.5rem',
-                      fontSize: '1.1rem',
-                      borderRadius: '12px',
-                      fontWeight: 600,
-                      gap: '0.5rem',
-                      width: '100%',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    🛒 立即去購物車使用
-                  </a>
-                </div>
                 
                 <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568', width: '100%' }}>
                   <strong>兌換說明：</strong>{result.message}<br/>

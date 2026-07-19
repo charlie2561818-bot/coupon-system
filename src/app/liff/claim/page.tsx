@@ -242,29 +242,6 @@ export default function LiffClaimPage() {
                     <div className={styles.codeLabel}>專屬序號 (Promo Code)</div>
                     <div className={styles.codeValue}>{result.code}</div>
                   </div>
-
-                  <div style={{ textAlign: 'center', marginTop: '1rem', marginBottom: '1.5rem' }}>
-                    <a 
-                      href={`https://yuanfateaorder.netlify.app/?discount_code=${result.code}`}
-                      className={styles.btn}
-                      style={{ 
-                        display: 'inline-flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        textDecoration: 'none', 
-                        background: '#5c6e5c', 
-                        color: '#fff',
-                        padding: '0.875rem 1.5rem',
-                        fontSize: '1.1rem',
-                        borderRadius: '12px',
-                        fontWeight: 600,
-                        gap: '0.5rem',
-                        width: '100%',
-                      }}
-                    >
-                      🛒 立即去購物車使用
-                    </a>
-                  </div>
                   
                   <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>
                     <strong>本優惠適用於現場結帳與線上客服（LINE/FB/IG）。</strong><br/>
