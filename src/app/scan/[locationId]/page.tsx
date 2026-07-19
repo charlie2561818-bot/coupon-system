@@ -81,6 +81,12 @@ export default function ScanPage() {
         if (campaignKey) {
           const claimed = localStorage.getItem(`claimed_campaign_${campaignKey}`);
           if (claimed === 'true') {
+            const savedResult = localStorage.getItem(`result_campaign_${campaignKey}`);
+            if (savedResult) {
+              setResult(JSON.parse(savedResult));
+              setPageState('RESULT');
+              return;
+            }
             setPageState('BLOCKED');
             return;
           }
@@ -125,6 +131,7 @@ export default function ScanPage() {
       const campaignKey = data.campaignId || locationInfo?.campaignId;
       if (campaignKey) {
         localStorage.setItem(`claimed_campaign_${campaignKey}`, 'true');
+        localStorage.setItem(`result_campaign_${campaignKey}`, JSON.stringify(data));
       }
 
       // 設定影片並播放

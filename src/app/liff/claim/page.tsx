@@ -111,6 +111,12 @@ export default function LiffClaimPage() {
         if (data.campaignId) {
           localStorage.setItem(`hasDrawn_${data.campaignId}`, 'true');
         }
+        if (data.alreadyClaimed) {
+          // 如果已經領取過，直接跳轉到結果頁，不播影片
+          setPhase('REVEAL');
+          return;
+        }
+
         if (videoRef.current) {
           videoRef.current.src = data.won ? "/win-animation.mp4" : "/lose-animation.mp4";
           videoRef.current.play().catch(e => console.error("Video play blocked:", e));
@@ -178,9 +184,12 @@ export default function LiffClaimPage() {
                 <p style={{ marginTop: '0.5rem' }}>{liffError}</p>
               </div>
             ) : hasDrawn ? (
-              <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
-                <p>您已經抽過囉！把機會留給別人吧！</p>
-              </div>
+              <>
+                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>您之前已經參加過此活動囉！</p>
+                <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem', background: '#5c6e5c' }}>
+                  🎫 查看我的優惠券
+                </button>
+              </>
             ) : (
               <>
                 <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！</p>
