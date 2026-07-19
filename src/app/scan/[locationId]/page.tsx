@@ -309,8 +309,13 @@ export default function ScanPage() {
                   <div className={styles.codeValue}>{result.code}</div>
                 </div>
 
+                <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568', width: '100%' }}>
+                  <strong>兌換說明：</strong>{result.message}<br/>
+                  <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
+                </div>
+
                 {result.showInCart && (
-                  <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <div style={{ textAlign: 'center', marginTop: '1.5rem', width: '100%' }}>
                     <a 
                       href={`https://yuanfateaorder.netlify.app/?discount_code=${result.code}`}
                       className={styles.resetBtn}
@@ -334,11 +339,6 @@ export default function ScanPage() {
                     </a>
                   </div>
                 )}
-                
-                <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568', width: '100%' }}>
-                  <strong>兌換說明：</strong>{result.message}<br/>
-                  <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
-                </div>
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '2rem 0' }}>

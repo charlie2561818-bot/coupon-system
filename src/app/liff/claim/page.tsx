@@ -243,8 +243,13 @@ export default function LiffClaimPage() {
                     <div className={styles.codeValue}>{result.code}</div>
                   </div>
 
+                  <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568' }}>
+                    <strong>兌換說明：</strong>{result.message}<br/>
+                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
+                  </div>
+
                   {result.showInCart && (
-                    <div style={{ textAlign: 'center', marginTop: '1rem', width: '100%' }}>
+                    <div style={{ textAlign: 'center', marginTop: '1.5rem', width: '100%' }}>
                       <a 
                         href={`https://yuanfateaorder.netlify.app/?discount_code=${result.code}`}
                         className={styles.drawBtn}
@@ -269,18 +274,6 @@ export default function LiffClaimPage() {
                       </a>
                     </div>
                   )}
-                  
-                  <div className={styles.instructions} style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem' }}>
-                    <strong>本優惠適用於現場結帳與線上客服（LINE/FB/IG）。</strong><br/>
-                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Valid for in-store and online messages (LINE/FB/IG).)</span><br/><br/>
-                    <strong>現場結帳：</strong>請於結帳時向服務人員出示此畫面。<br/>
-                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(In-store: Please present this screen to our staff at checkout.)</span><br/><br/>
-                    <strong>線上客服：</strong>請截圖此畫面或提供上方的『優惠代碼』傳送給我們。<br/>
-                    <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Online: Please send a screenshot of this page or the Promo Code to us via message.)</span>
-                    <span style={{ fontSize: '0.8rem', color: '#999', display: 'block', marginTop: '1rem', textAlign: 'center' }}>
-                      {result.message}
-                    </span>
-                  </div>
                 </>
               ) : (
                 <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
