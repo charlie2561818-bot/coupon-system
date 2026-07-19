@@ -179,30 +179,6 @@ export default async function CouponPublicPage({ params }: PageProps) {
               <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Online: Please send a screenshot of this page or the Promo Code to us via message.)</span>
             </div>
 
-            <div style={{
-              marginTop: '1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1rem',
-              background: 'rgba(255,255,255,0.95)',
-              padding: '1.5rem',
-              borderRadius: '16px',
-              width: '100%',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            }}>
-              <h3 style={{ margin: 0, color: '#333', fontSize: '1.1rem', fontWeight: 'bold', textAlign: 'center' }}>
-                門市核銷請出示以下條碼<br/>
-                <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#666' }}>Please present this QR code for in-store redemption.</span>
-              </h3>
-              
-              <InlineQRCode code={couponCode.code} />
-              
-              <p style={{ margin: 0, color: '#666', fontSize: '1.2rem', letterSpacing: '2px', fontWeight: 'bold' }}>
-                {couponCode.code}
-              </p>
-            </div>
-
             {coupon.showInCart && (
               <div style={{ textAlign: 'center', marginTop: '1.5rem', width: '100%' }}>
                 <a 
@@ -228,6 +204,30 @@ export default async function CouponPublicPage({ params }: PageProps) {
                 </a>
               </div>
             )}
+
+            <div style={{
+              marginTop: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1rem',
+              background: 'rgba(255,255,255,0.95)',
+              padding: '1.5rem',
+              borderRadius: '16px',
+              width: '100%',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            }}>
+              <h3 style={{ margin: 0, color: '#333', fontSize: '1.1rem', fontWeight: 'bold', textAlign: 'center' }}>
+                門市核銷請出示以下條碼<br/>
+                <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#666' }}>Please present this QR code for in-store redemption.</span>
+              </h3>
+              
+              <InlineQRCode code={couponCode.code} />
+              
+              <p style={{ margin: 0, color: '#666', fontSize: '1.2rem', letterSpacing: '2px', fontWeight: 'bold' }}>
+                {couponCode.code}
+              </p>
+            </div>
           </>
         ) : (
           <div style={{
