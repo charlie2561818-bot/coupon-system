@@ -310,8 +310,7 @@ export default function ScanPage() {
                 </div>
 
                 <div style={{ textAlign: 'left', lineHeight: '1.6', fontSize: '0.9rem', marginTop: '1.5rem', background: '#f5f7f5', padding: '1rem', borderRadius: '12px', color: '#4a5568', width: '100%' }}>
-                  <strong>兌換說明：</strong>{result.message}<br/>
-                  <span style={{ fontSize: '0.85em', opacity: 0.8 }}>(Instruction: Please present this screen to our staff.)</span>
+                  <strong>兌換說明：</strong>{result.message}
                 </div>
 
                 {result.showInCart && (
