@@ -175,12 +175,15 @@ export default function WebClaimPage() {
         ) : (
           <div className={styles.successWrapper}>
             <h1 className={styles.title} style={{ marginTop: '1rem' }}>
-              {isDraw ? '抽獎結果' : '領券結果'}
+              {isDraw ? '抽獎結果 (Draw Result)' : '領券結果 (Claim Result)'}
             </h1>
             {result?.success ? (
               result.won ? (
                 <>
-                  <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>🎉 恭喜中獎！您的專屬兌換碼為：</p>
+                  <p style={{ color: '#2c3e2e', marginBottom: '1rem', fontWeight: 500, fontSize: '1.2rem' }}>
+                    🎉 恭喜中獎！您的專屬兌換碼為：<br/>
+                    <span style={{ fontSize: '0.85em', fontWeight: 'normal', opacity: 0.8 }}>(Congratulations! Your promo code is:)</span>
+                  </p>
                   
                   {result.couponTitle && (
                     <div style={{ textAlign: 'center', margin: '0 0 1rem 0' }}>
@@ -225,7 +228,7 @@ export default function WebClaimPage() {
                 <div className={styles.errorBox} style={{ borderLeftColor: '#7a8b7a', background: '#f5f7f5', color: '#5c6e5c' }}>
                   <div className={styles.qrWrapper} style={{ background: 'transparent', boxShadow: 'none', margin: 0, padding: 0 }}>
                     <div>
-                      <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎 (Not a Winner)</p>
+                      <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>未中獎 <span style={{fontSize: '0.85em', fontWeight: 'normal', opacity: 0.8}}>(Not a Winner)</span></p>
                       <p>{result.message || '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'}</p>
                     </div>
                   </div>
