@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { QrCode, X, Check, Send } from 'lucide-react';
+import { QrCode, X, Check, Send, Copy } from 'lucide-react';
 import QRCodeDisplay from './QRCodeDisplay';
 
 interface CouponCode {
@@ -22,6 +22,7 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
   const itemsPerPage = 10;
 
   // Sync with server data on soft refreshes
@@ -93,6 +94,19 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
       alert('發生錯誤');
     } finally {
       setIsUpdating(null);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!selectedCode) return;
+    try {
+      const url = `${window.location.origin}/c/${selectedCode}`;
+      await navigator.clipboard.writeText(url);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      alert('複製失敗，請手動複製');
     }
   };
 
@@ -207,9 +221,38 @@ export default function CouponCodeTable({ title, codes: initialCodes }: CouponCo
             </p>
             <QRCodeDisplay value={selectedCode} title={title} />
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <code style={{ fontSize: '1.25rem', fontWeight: 'bold', backgroundColor: 'var(--bg-color)', padding: '0.5rem 1rem', borderRadius: '4px' }}>
+              <code style={{ fontSize: '1.25rem', fontWeight: 'bold', backgroundColor: 'var(--bg-color)', padding: '0.5rem 1rem', borderRadius: '4px', display: 'inline-block', marginBottom: '1rem' }}>
                 {selectedCode}
               </code>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button 
+                  onClick={handleCopyLink}
+                  className="btn btn-outline"
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    width: '100%',
+                    justifyContent: 'center',
+                    backgroundColor: isCopied ? 'var(--success-color)' : 'transparent',
+                    color: isCopied ? '#fff' : 'var(--primary-color)',
+                    borderColor: isCopied ? 'var(--success-color)' : 'var(--primary-color)',
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                >
+                  {isCopied ? (
+                    <>
+                      <Check size={18} />
+                      已複製！(Copied!)
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={18} />
+                      複製專屬連結 (Copy Link)
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
