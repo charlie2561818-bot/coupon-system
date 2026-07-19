@@ -174,20 +174,18 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
               </select>
             </div>
 
-            {coupon.mode === 'MULTI_USE' && (
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
-                <input
-                  id="showInCart"
-                  type="checkbox"
-                  checked={showInCart}
-                  onChange={(e) => setShowInCart(e.target.checked)}
-                  style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer' }}
-                />
-                <label htmlFor="showInCart" style={{ cursor: 'pointer', margin: 0, color: 'var(--text-primary)' }}>
-                  顯示於線上購物車結帳頁
-                </label>
-              </div>
-            )}
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+              <input
+                id="showInCart"
+                type="checkbox"
+                checked={showInCart}
+                onChange={(e) => setShowInCart(e.target.checked)}
+                style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer' }}
+              />
+              <label htmlFor="showInCart" style={{ cursor: 'pointer', margin: 0, color: 'var(--text-primary)' }}>
+                顯示於線上購物車結帳頁
+              </label>
+            </div>
           </div>
 
           {/* Right Column */}
