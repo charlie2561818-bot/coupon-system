@@ -61,7 +61,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         status: 'BLINDBOX', 
         locationName: location.name,
         campaignId: 'BLINDBOX',
-        showInCart: true 
+        showInCart: true,
+        isDraw: true
       });
     }
 
@@ -177,6 +178,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           success: true,
           won: false,
           campaignId: 'BLINDBOX',
+          isDraw: true,
           message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
         });
       }
@@ -201,6 +203,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         code: selectedCode.code,
         campaignId: selectedCampaign.id,
         showInCart: selectedCampaign.showInCart,
+        isDraw: true,
         message: selectedCampaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
       });
     }
