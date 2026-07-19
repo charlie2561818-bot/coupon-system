@@ -93,7 +93,6 @@ export async function PUT(
     const { id } = resolvedParams;
     
     const body = await request.json();
-    const { title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue, showInCart, isDraw } = body;
 
     const existingCoupon = await prisma.coupon.findUnique({
       where: { id },
@@ -104,30 +103,34 @@ export async function PUT(
       return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
     }
 
+    // Create an update object dynamically based on provided fields
+    const updateData: any = {};
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.englishTitle !== undefined) updateData.englishTitle = body.englishTitle;
+    if (body.usageRules !== undefined) updateData.usageRules = body.usageRules;
+    if (body.validFrom !== undefined) updateData.validFrom = new Date(body.validFrom);
+    if (body.validUntil !== undefined) updateData.validUntil = new Date(body.validUntil);
+    if (body.applicableBrand !== undefined) updateData.applicableBrand = body.applicableBrand;
+    if (body.discountType !== undefined) updateData.discountType = body.discountType;
+    if (body.discountValue !== undefined) updateData.discountValue = body.discountValue;
+    if (body.showInCart !== undefined) updateData.showInCart = Boolean(body.showInCart);
+    if (body.isDraw !== undefined) updateData.isDraw = Boolean(body.isDraw);
+    if (body.status !== undefined) updateData.status = body.status;
+    if (body.totalQuantity !== undefined && existingCoupon.mode === 'MULTI_USE') {
+      updateData.totalQuantity = body.totalQuantity;
+    }
+
     // Update parent
     const updatedCoupon = await prisma.coupon.update({
       where: { id },
-      data: {
-        title,
-        englishTitle,
-        usageRules,
-        validFrom: new Date(validFrom),
-        validUntil: new Date(validUntil),
-        applicableBrand,
-        discountType,
-        discountValue,
-        showInCart: showInCart !== undefined ? Boolean(showInCart) : true,
-        isDraw: isDraw !== undefined ? Boolean(isDraw) : true,
-        // Only update totalQuantity for MULTI_USE
-        ...(existingCoupon.mode === 'MULTI_USE' ? { totalQuantity } : {})
-      },
+      data: updateData,
     });
 
-    // If MULTI_USE, also update maxUsage on the single code
-    if (existingCoupon.mode === 'MULTI_USE' && existingCoupon.codes.length > 0) {
+    // If MULTI_USE, also update maxUsage on the single code if totalQuantity is provided
+    if (existingCoupon.mode === 'MULTI_USE' && existingCoupon.codes.length > 0 && body.totalQuantity !== undefined) {
       await prisma.couponCode.update({
         where: { id: existingCoupon.codes[0].id },
-        data: { maxUsage: totalQuantity }
+        data: { maxUsage: body.totalQuantity }
       });
     }
 
