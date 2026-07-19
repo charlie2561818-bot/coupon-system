@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { mode, code, title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue, showInCart, isDraw, status } = body;
+    const { mode, code, title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue, showInCart, isDraw, status, isDuplicate } = body;
 
     const generateCode = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         discountValue,
         showInCart: showInCart !== undefined ? Boolean(showInCart) : true,
         isDraw: isDraw !== undefined ? Boolean(isDraw) : true,
-        status: status || 'ACTIVE',
+        status: isDuplicate ? 'PAUSED' : (status || 'ACTIVE'),
         codes: {
           create: codesData,
         }

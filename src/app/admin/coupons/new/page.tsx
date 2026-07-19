@@ -18,7 +18,7 @@ export default function NewCouponPage() {
   const [englishTitle, setEnglishTitle] = useState('');
   const [usageRules, setUsageRules] = useState('');
   const [code, setCode] = useState(''); 
-  const [totalQuantity, setTotalQuantity] = useState('100');
+  const [totalQuantity, setTotalQuantity] = useState('');
   const [validFrom, setValidFrom] = useState('');
   const [validUntil, setValidUntil] = useState('');
   const [applicableBrand, setApplicableBrand] = useState('源發茶業');
@@ -88,7 +88,8 @@ export default function NewCouponPage() {
           discountValue: discountType === 'FREE_GIFT' ? 0 : parseFloat(discountValue),
           showInCart,
           isDraw,
-          status: isDuplicate ? 'PAUSED' : 'ACTIVE'
+          status: isDuplicate ? 'PAUSED' : 'ACTIVE',
+          isDuplicate
         }),
       });
 

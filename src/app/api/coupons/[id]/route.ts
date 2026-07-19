@@ -115,7 +115,16 @@ export async function PUT(
     if (body.discountValue !== undefined) updateData.discountValue = body.discountValue;
     if (body.showInCart !== undefined) updateData.showInCart = Boolean(body.showInCart);
     if (body.isDraw !== undefined) updateData.isDraw = Boolean(body.isDraw);
-    if (body.status !== undefined) updateData.status = body.status;
+    if (body.status !== undefined) {
+      if (body.status === 'ACTIVE') {
+        const now = new Date();
+        const checkValidUntil = updateData.validUntil || existingCoupon.validUntil;
+        if (now > new Date(checkValidUntil)) {
+          return NextResponse.json({ error: "無法啟用已過期的活動 (Cannot activate an expired campaign)" }, { status: 400 });
+        }
+      }
+      updateData.status = body.status;
+    }
     if (body.totalQuantity !== undefined && existingCoupon.mode === 'MULTI_USE') {
       updateData.totalQuantity = body.totalQuantity;
     }
