@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Gift, X, Check, Copy } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
@@ -13,6 +13,13 @@ export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const handleDirectSend = async () => {
     setIsSending(true);
@@ -41,15 +48,36 @@ export default function DirectSendButton({ couponId }: DirectSendButtonProps) {
     setIsModalOpen(false);
     setGeneratedCode(null);
     setIsCopied(false);
+    if (timerRef.current) clearTimeout(timerRef.current);
   };
 
   const handleCopyLink = async () => {
     if (!generatedCode) return;
+    const url = `${window.location.origin}/c/${generatedCode}`;
+    
     try {
-      const url = `${window.location.origin}/c/${generatedCode}`;
-      await navigator.clipboard.writeText(url);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        // Fallback for older Line browsers or non-HTTPS environments
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (!successful) throw new Error('execCommand copy failed');
+      }
+      
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy text: ', err);
       alert('複製失敗，請手動複製');
