@@ -25,6 +25,7 @@ export default function WebClaimPage() {
   const [showFlash, setShowFlash] = useState(false);
   const [result, setResult] = useState<ClaimResult | null>(null);
   const [qrValue, setQrValue] = useState('');
+  const [isDraw, setIsDraw] = useState(true);
   
   const [hasDrawn, setHasDrawn] = useState(false);
 
@@ -51,7 +52,19 @@ export default function WebClaimPage() {
       if (drawn === 'true') {
         setHasDrawn(true);
       }
-      setIsInitializing(false);
+      
+      // Fetch campaign details
+      fetch(`/api/claim/web/${campaignId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setIsDraw(data.isDraw ?? true);
+          }
+          setIsInitializing(false);
+        })
+        .catch(() => {
+          setIsInitializing(false);
+        });
     }
   }, [campaignId]);
 
@@ -73,6 +86,12 @@ export default function WebClaimPage() {
         if (data.campaignId) {
           localStorage.setItem(`hasDrawn_${campaignId}`, 'true');
         }
+
+        if (data.isDraw === false) {
+          setPhase('REVEAL');
+          return;
+        }
+
         if (videoRef.current) {
           videoRef.current.src = data.won ? "/win-animation.mp4" : "/lose-animation.mp4";
           videoRef.current.play().catch(e => console.error("Video play blocked:", e));
@@ -111,7 +130,10 @@ export default function WebClaimPage() {
         {phase === 'FETCHING' ? (
           <div className={styles.loadingWrapper}>
             <div className={styles.spinner}></div>
-            <p className={styles.instructions}>正在為您開獎...<br/>(Drawing...)</p>
+            <p className={styles.instructions}>
+              {isDraw ? '正在為您開獎...' : '正在為您領取...'}<br/>
+              {isDraw ? '(Drawing...)' : '(Claiming...)'}
+            </p>
           </div>
         ) : phase === 'PLAYING' ? (
           <></>
@@ -131,9 +153,12 @@ export default function WebClaimPage() {
               </div>
             ) : (
               <>
-                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！<br/>(Click the button below to test your luck!)</p>
+                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>
+                  {isDraw ? '點擊下方按鈕，測試您的好手氣！' : '點擊下方按鈕，立即領取專屬優惠券！'}<br/>
+                  {isDraw ? '(Click the button below to test your luck!)' : '(Click the button below to claim your coupon!)'}
+                </p>
                 <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem' }}>
-                  🎁 抽獎去！ (Draw Now!)
+                  {isDraw ? '🎁 抽獎去！ (Draw Now!)' : '🎁 馬上領取！ (Claim Now!)'}
                 </button>
               </>
             )}
@@ -145,7 +170,9 @@ export default function WebClaimPage() {
           </div>
         ) : (
           <div className={styles.successWrapper}>
-            <h1 className={styles.title} style={{ marginTop: '1rem' }}>抽獎結果</h1>
+            <h1 className={styles.title} style={{ marginTop: '1rem' }}>
+              {isDraw ? '抽獎結果' : '領券結果'}
+            </h1>
             {result?.success ? (
               result.won ? (
                 <>

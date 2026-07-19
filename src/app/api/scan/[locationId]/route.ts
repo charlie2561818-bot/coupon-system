@@ -118,7 +118,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       campaignId: campaign.id,
       campaignTitle: campaign.title,
       campaignEnglishTitle: campaign.englishTitle,
-      showInCart: campaign.showInCart
+      showInCart: campaign.showInCart,
+      isDraw: campaign.isDraw
     });
 
   } catch (error) {
@@ -240,12 +241,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ success: false, won: false, message: '非活動期間。' });
     }
 
-    // 30% 中獎率
-    if (Math.random() > WIN_RATE) {
+    // 抽獎或直接領取邏輯
+    const ACTUAL_WIN_RATE = campaign.isDraw ? 0.3 : 1.0;
+    if (Math.random() > ACTUAL_WIN_RATE) {
       return NextResponse.json({
         success: true,
         won: false,
         campaignId: campaign.id,
+        isDraw: campaign.isDraw,
         message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
@@ -264,7 +267,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       code: selectedCode.code,
       campaignId: campaign.id,
       showInCart: campaign.showInCart,
-      message: campaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。'
+      isDraw: campaign.isDraw,
+      message: campaign.usageRules || '恭喜中獎！請向櫃檯人員出示此畫面。 (Congratulations! Please present this screen to our staff.)'
     });
 
   } catch (error) {

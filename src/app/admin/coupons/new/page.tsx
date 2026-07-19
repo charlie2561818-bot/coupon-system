@@ -21,9 +21,10 @@ export default function NewCouponPage() {
   const [validFrom, setValidFrom] = useState('');
   const [validUntil, setValidUntil] = useState('');
   const [applicableBrand, setApplicableBrand] = useState('源發茶業');
-  const [discountType, setDiscountType] = useState('FIXED_AMOUNT');
+  const [discountType, setDiscountType] = useState('PERCENTAGE');
   const [discountValue, setDiscountValue] = useState('');
   const [showInCart, setShowInCart] = useState(true);
+  const [isDraw, setIsDraw] = useState(true);
 
   const generateRandomCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -58,6 +59,7 @@ export default function NewCouponPage() {
           discountType,
           discountValue: discountType === 'FREE_GIFT' ? 0 : parseFloat(discountValue),
           showInCart,
+          isDraw
         }),
       });
 
@@ -107,6 +109,20 @@ export default function NewCouponPage() {
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                   <input type="radio" name="mode" value="MULTI_USE" checked={mode === 'MULTI_USE'} onChange={() => setMode('MULTI_USE')} />
                   B 模式：一碼多用 (產生單一 QR Code)
+                </label>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">互動模式</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="isDraw" value="true" checked={isDraw === true} onChange={() => setIsDraw(true)} />
+                  抽獎模式 (30%中獎機率 + 動畫)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="isDraw" value="false" checked={isDraw === false} onChange={() => setIsDraw(false)} />
+                  直接領取 (100%獲得 + 無動畫)
                 </label>
               </div>
             </div>

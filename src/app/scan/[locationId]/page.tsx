@@ -134,6 +134,12 @@ export default function ScanPage() {
         localStorage.setItem(`result_campaign_${campaignKey}`, JSON.stringify(data));
       }
 
+      // 如果不是抽獎模式，直接顯示結果
+      if (data.isDraw === false) {
+        setPageState('REVEAL');
+        return;
+      }
+
       // 設定影片並播放
       if (videoRef.current) {
         videoRef.current.src = data.won ? '/win-animation.mp4' : '/lose-animation.mp4';
@@ -239,12 +245,14 @@ export default function ScanPage() {
             </span>
           </h1>
           <p style={{ fontSize: '1.2rem', color: '#666', textAlign: 'center', lineHeight: '1.6' }}>
-            試試手氣，看看今天老闆準備了什麼驚喜！<br/>
-            <span style={{ fontSize: '1rem', opacity: 0.8 }}>(Test your luck and see what surprise the boss prepared today!)</span>
+            {locationInfo.isDraw ? '試試手氣，看看今天老闆準備了什麼驚喜！' : '點擊下方按鈕，領取專屬驚喜優惠！'}<br/>
+            <span style={{ fontSize: '1rem', opacity: 0.8 }}>
+              {locationInfo.isDraw ? '(Test your luck and see what surprise the boss prepared today!)' : '(Click the button below to claim your surprise offer!)'}
+            </span>
           </p>
           <button className={styles.drawBtn} onClick={handleStartDraw}>
-            <div style={{ fontWeight: 'bold' }}>馬上開抽！</div>
-            <div style={{ fontSize: '1rem', fontWeight: 'normal', opacity: 0.9 }}>(Draw Now!)</div>
+            <div style={{ fontWeight: 'bold' }}>{locationInfo.isDraw ? '馬上開抽！' : '馬上領取！'}</div>
+            <div style={{ fontSize: '1rem', fontWeight: 'normal', opacity: 0.9 }}>{locationInfo.isDraw ? '(Draw Now!)' : '(Claim Now!)'}</div>
           </button>
         </div>
       )}

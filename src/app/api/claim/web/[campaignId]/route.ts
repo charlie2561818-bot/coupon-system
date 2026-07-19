@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function GET(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
+  try {
+    const { campaignId } = await params;
+    const campaign = await prisma.coupon.findUnique({
+      where: { id: campaignId },
+      select: { title: true, isDraw: true, status: true }
+    });
+
+    if (!campaign || campaign.status !== 'ACTIVE') {
+      return NextResponse.json({ success: false, message: '此活動不存在或已結束。' });
+    }
+
+    return NextResponse.json({ success: true, title: campaign.title, isDraw: campaign.isDraw });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: '伺服器錯誤' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
   try {
     const { campaignId } = await params;
@@ -18,9 +36,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ success: false, message: '非活動期間，無法參與抽獎。 (This campaign is currently inactive or has expired.)' });
     }
 
-    // 隨機抽獎邏輯
-    // 隨機抽獎邏輯
-    const WIN_RATE = 0.3; // 30% 中獎率
+    // 抽獎或直接領取邏輯
+    const WIN_RATE = campaign.isDraw ? 0.3 : 1.0; // 若非抽獎模式，中獎率 100%
     const isWinner = Math.random() <= WIN_RATE;
 
     if (!isWinner) {
@@ -28,6 +45,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         success: true,
         won: false,
         campaignId,
+        isDraw: campaign.isDraw,
         message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
@@ -77,6 +95,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       code: availableCode.code,
       couponTitle: campaign.title,
       couponEnglishTitle: campaign.englishTitle,
+      isDraw: campaign.isDraw,
       message: `恭喜中獎！這是您的專屬優惠碼！`
     });
 

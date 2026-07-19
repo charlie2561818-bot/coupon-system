@@ -28,7 +28,8 @@ export async function GET() {
       return NextResponse.json({ 
         success: true, 
         campaignId: activeCampaign.id,
-        title: activeCampaign.title 
+        title: activeCampaign.title,
+        isDraw: activeCampaign.isDraw
       });
     }
 
@@ -48,7 +49,8 @@ export async function GET() {
     return NextResponse.json({ 
       success: true, 
       campaignId: activeCampaign.id,
-      title: activeCampaign.title 
+      title: activeCampaign.title,
+      isDraw: activeCampaign.isDraw
     });
   } catch (error) {
     return NextResponse.json({ success: false, message: '伺服器錯誤' }, { status: 500 });

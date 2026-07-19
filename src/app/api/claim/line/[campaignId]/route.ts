@@ -40,13 +40,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         couponTitle: campaign.title,
         couponEnglishTitle: campaign.englishTitle,
         showInCart: campaign.showInCart,
+        isDraw: campaign.isDraw,
         message: '您已經領取過此活動的專屬序號囉！ (You have already claimed a promo code for this campaign!)'
       });
     }
 
-    // 隨機抽獎邏輯
-    // 隨機抽獎邏輯
-    const WIN_RATE = 0.3; // 30% 中獎率
+    // 抽獎或直接領取邏輯
+    const WIN_RATE = campaign.isDraw ? 0.3 : 1.0; // 若非抽獎模式，中獎率 100%
     const isWinner = Math.random() <= WIN_RATE;
 
     if (!isWinner) {
@@ -55,6 +55,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         won: false,
         alreadyClaimed: false,
         campaignId,
+        isDraw: campaign.isDraw,
         message: '哎呀，差一點點！下次再來試試手氣吧！ (Oops, so close! Better luck next time!)'
       });
     }
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       couponTitle: campaign.title,
       couponEnglishTitle: campaign.englishTitle,
       showInCart: campaign.showInCart,
+      isDraw: campaign.isDraw,
       message: `嗨 ${displayName || '好友'}，恭喜中獎！這是您的專屬優惠碼！`
     });
 

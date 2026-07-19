@@ -26,9 +26,10 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
   const [validFrom, setValidFrom] = useState(formatForInput(coupon.validFrom));
   const [validUntil, setValidUntil] = useState(formatForInput(coupon.validUntil));
   const [applicableBrand, setApplicableBrand] = useState(coupon.applicableBrand);
-  const [discountType, setDiscountType] = useState(coupon.discountType);
-  const [discountValue, setDiscountValue] = useState(coupon.discountValue.toString());
+  const [discountType, setDiscountType] = useState(coupon.discountType || 'FIXED_AMOUNT');
+  const [discountValue, setDiscountValue] = useState(coupon.discountValue?.toString() || '');
   const [showInCart, setShowInCart] = useState(coupon.showInCart ?? true);
+  const [isDraw, setIsDraw] = useState(coupon.isDraw ?? true);
 
 
 
@@ -54,6 +55,7 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
           discountType,
           discountValue: discountType === 'FREE_GIFT' ? 0 : parseFloat(discountValue),
           showInCart,
+          isDraw,
         }),
       });
 
@@ -97,6 +99,20 @@ export default function EditCouponClient({ coupon }: EditCouponClientProps) {
               <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-color)', borderRadius: '4px', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
                 {coupon.mode === 'SINGLE_USE' ? 'A 模式：一券一碼' : 'B 模式：一碼多用'}
                 <span style={{ fontSize: '0.85rem', marginLeft: '0.5rem' }}>(發行後不可更改)</span>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">互動模式</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="isDraw" value="true" checked={isDraw === true} onChange={() => setIsDraw(true)} />
+                  抽獎模式 (30%中獎機率 + 動畫)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="isDraw" value="false" checked={isDraw === false} onChange={() => setIsDraw(false)} />
+                  直接領取 (100%獲得 + 無動畫)
+                </label>
               </div>
             </div>
 

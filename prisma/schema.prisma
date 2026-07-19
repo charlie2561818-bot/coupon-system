@@ -42,6 +42,7 @@ model Coupon {
   updatedAt        DateTime @updatedAt
   showInCart       Boolean  @default(true) // 是否顯示於線上購物車結帳頁
   status           String   @default("ACTIVE") // "ACTIVE", "PAUSED", "EXPIRED"
+  isDraw           Boolean  @default(true) // 是否為抽獎模式（false 為直接領取）
 
   codes            CouponCode[]
 }

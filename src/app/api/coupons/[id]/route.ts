@@ -64,7 +64,7 @@ export async function PUT(
     const { id } = resolvedParams;
     
     const body = await request.json();
-    const { title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue, showInCart } = body;
+    const { title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue, showInCart, isDraw } = body;
 
     const existingCoupon = await prisma.coupon.findUnique({
       where: { id },
@@ -88,6 +88,7 @@ export async function PUT(
         discountType,
         discountValue,
         showInCart: showInCart !== undefined ? Boolean(showInCart) : true,
+        isDraw: isDraw !== undefined ? Boolean(isDraw) : true,
         // Only update totalQuantity for MULTI_USE
         ...(existingCoupon.mode === 'MULTI_USE' ? { totalQuantity } : {})
       },

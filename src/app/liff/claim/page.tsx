@@ -25,6 +25,7 @@ export default function LiffClaimPage() {
   
   const [profile, setProfile] = useState<{ userId: string, displayName: string } | null>(null);
   const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
+  const [isDraw, setIsDraw] = useState(true);
   const [hasDrawn, setHasDrawn] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -71,6 +72,7 @@ export default function LiffClaimPage() {
         
         if (data.success && data.campaignId) {
           setActiveCampaignId(data.campaignId);
+          setIsDraw(data.isDraw ?? true);
           // 檢查 LocalStorage 是否已經抽過
           const drawn = localStorage.getItem(`hasDrawn_${data.campaignId}`);
           if (drawn === 'true') {
@@ -113,6 +115,12 @@ export default function LiffClaimPage() {
         }
         if (data.alreadyClaimed) {
           // 如果已經領取過，直接跳轉到結果頁，不播影片
+          setPhase('REVEAL');
+          return;
+        }
+
+        if (data.isDraw === false) {
+          // 如果是非抽獎模式，直接顯示結果不播影片
           setPhase('REVEAL');
           return;
         }
@@ -164,7 +172,7 @@ export default function LiffClaimPage() {
         {phase === 'FETCHING' ? (
           <div className={styles.loadingWrapper}>
             <div className={styles.spinner}></div>
-            <p className={styles.instructions}>正在為您開獎 (Drawing for you...)</p>
+            <p className={styles.instructions}>{isDraw ? '正在為您開獎 (Drawing for you...)' : '正在為您領取優惠券 (Claiming...'}</p>
           </div>
         ) : phase === 'PLAYING' ? (
           <></>
@@ -192,9 +200,11 @@ export default function LiffClaimPage() {
               </>
             ) : (
               <>
-                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>點擊下方按鈕，測試您的好手氣！</p>
+                <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#2c3e2e' }}>
+                  {isDraw ? '點擊下方按鈕，測試您的好手氣！' : '點擊下方按鈕，立即領取專屬優惠券！'}
+                </p>
                 <button className={styles.btn} onClick={claimCoupon} style={{ fontSize: '1.1rem', padding: '1rem', marginBottom: '1rem' }}>
-                  🎁 抽獎去！
+                  {isDraw ? '🎁 抽獎去！' : '🎁 馬上領取！'}
                 </button>
               </>
             )}
@@ -205,8 +215,10 @@ export default function LiffClaimPage() {
             </div>
           </div>
         ) : (
-          <div className={styles.successWrapper}>
-            <h1 className={styles.title} style={{ marginTop: '1rem' }}>抽獎結果</h1>
+          <div className={styles.resultWrapper}>
+            <h1 className={styles.title} style={{ marginTop: '1rem' }}>
+              {isDraw ? '抽獎結果' : '領券結果'}
+            </h1>
             {result?.success ? (
               result.won ? (
                 <>
