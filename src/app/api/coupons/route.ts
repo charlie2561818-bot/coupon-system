@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { mode, code, title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue } = body;
+    const { mode, code, title, englishTitle, usageRules, totalQuantity, validFrom, validUntil, applicableBrand, discountType, discountValue, showInCart } = body;
 
     const generateCode = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -70,6 +70,7 @@ export async function POST(request: Request) {
         applicableBrand,
         discountType,
         discountValue,
+        showInCart: showInCart !== undefined ? Boolean(showInCart) : true,
         codes: {
           create: codesData,
         }

@@ -21,6 +21,7 @@ model User {
   securityAnswer   String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  showInCart       Boolean  @default(true) // 是否顯示於線上購物車結帳頁
 
   redemptions Redemption[]
 }
@@ -40,6 +41,7 @@ model Coupon {
   discountValue    Float
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  showInCart       Boolean  @default(true) // 是否顯示於線上購物車結帳頁
   status           String   @default("ACTIVE") // "ACTIVE", "PAUSED", "EXPIRED"
 
   codes            CouponCode[]
@@ -80,4 +82,5 @@ model QrLocation {
   activeCampaignId String?  // 綁定的活動 ID，可為特定 campaignId、'BLINDBOX' 或 null
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  showInCart       Boolean  @default(true) // 是否顯示於線上購物車結帳頁
 }

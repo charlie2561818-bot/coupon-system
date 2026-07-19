@@ -23,6 +23,7 @@ export async function GET() {
       where: {
         mode: 'MULTI_USE',
         status: 'ACTIVE',
+        showInCart: true,
         validFrom: { lte: now },
         validUntil: { gte: now },
       },

@@ -23,6 +23,7 @@ export default function NewCouponPage() {
   const [applicableBrand, setApplicableBrand] = useState('源發茶業');
   const [discountType, setDiscountType] = useState('FIXED_AMOUNT');
   const [discountValue, setDiscountValue] = useState('');
+  const [showInCart, setShowInCart] = useState(true);
 
   const generateRandomCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -56,6 +57,7 @@ export default function NewCouponPage() {
           applicableBrand,
           discountType,
           discountValue: discountType === 'FREE_GIFT' ? 0 : parseFloat(discountValue),
+          showInCart,
         }),
       });
 
@@ -196,6 +198,21 @@ export default function NewCouponPage() {
                 <option value="聯合活動">聯合活動 (通用)</option>
               </select>
             </div>
+
+            {mode === 'MULTI_USE' && (
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                <input
+                  id="showInCart"
+                  type="checkbox"
+                  checked={showInCart}
+                  onChange={(e) => setShowInCart(e.target.checked)}
+                  style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer' }}
+                />
+                <label htmlFor="showInCart" style={{ cursor: 'pointer', margin: 0, color: 'var(--text-primary)' }}>
+                  顯示於線上購物車結帳頁
+                </label>
+              </div>
+            )}
           </div>
 
           {/* Right Column */}
