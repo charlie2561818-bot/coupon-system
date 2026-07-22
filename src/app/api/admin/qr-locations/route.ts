@@ -99,18 +99,27 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: '權限不足' }, { status: 403 });
     }
 
-    const { id, activeCampaignId } = await request.json();
+    const { id, activeCampaignId, name } = await request.json();
 
     if (!id) {
       return NextResponse.json({ success: false, message: '缺少立牌 ID' });
     }
 
+    const dataToUpdate: any = {
+      updatedAt: new Date(),
+    };
+    
+    if (activeCampaignId !== undefined) {
+      dataToUpdate.activeCampaignId = activeCampaignId || null;
+    }
+    
+    if (name !== undefined) {
+      dataToUpdate.name = name.trim();
+    }
+
     const location = await prisma.qrLocation.update({
       where: { id },
-      data: { 
-        activeCampaignId: activeCampaignId || null,
-        updatedAt: new Date(),
-      }
+      data: dataToUpdate
     });
 
     return NextResponse.json({ success: true, location });

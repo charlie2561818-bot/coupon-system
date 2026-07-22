@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Plus, Trash2, Link as LinkIcon, QrCode } from 'lucide-react';
+import { MapPin, Plus, Trash2, Link as LinkIcon, QrCode, Edit2, Check, X } from 'lucide-react';
 
 interface QrLocation {
   id: string;
@@ -23,6 +23,8 @@ export default function QrLocationManager() {
   const [newName, setNewName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const fetchData = async () => {
@@ -95,6 +97,30 @@ export default function QrLocationManager() {
     }
   };
 
+  const handleSaveEdit = async (id: string) => {
+    if (!editName.trim()) return;
+    setSavingId(id);
+    try {
+      const res = await fetch('/api/admin/qr-locations', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name: editName.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMessage('名稱已更新！', 'success');
+        setEditingId(null);
+        fetchData();
+      } else {
+        showMessage(data.message || '更新失敗', 'error');
+      }
+    } catch (_err) {
+      showMessage('更新失敗', 'error');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`確定要刪除「${name}」嗎？`)) return;
     try {
@@ -145,7 +171,10 @@ export default function QrLocationManager() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="輸入立牌名稱（例如：泡茶區原木立牌）"
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+          onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing) return;
+            if (e.key === 'Enter') handleAdd();
+          }}
           style={{
             flex: 1,
             padding: '0.625rem 1rem',
@@ -195,9 +224,45 @@ export default function QrLocationManager() {
             }}>
               {/* 第一行：名稱 + 刪除 */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                   <QrCode size={18} style={{ color: 'var(--primary-color)' }} />
-                  <strong style={{ fontSize: '1rem' }}>{loc.name}</strong>
+                  {editingId === loc.id ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, maxWidth: '300px' }}>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.nativeEvent.isComposing) return;
+                          if (e.key === 'Enter') handleSaveEdit(loc.id);
+                          if (e.key === 'Escape') setEditingId(null);
+                        }}
+                        autoFocus
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '4px',
+                          border: '1px solid var(--primary-color)',
+                          fontSize: '1rem',
+                          flex: 1,
+                          background: 'var(--bg-color)',
+                          color: 'var(--text-primary)'
+                        }}
+                      />
+                      <button onClick={() => handleSaveEdit(loc.id)} disabled={savingId === loc.id} style={{ background: 'none', border: 'none', color: 'var(--success-color)', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }} title="儲存"><Check size={18} /></button>
+                      <button onClick={() => setEditingId(null)} disabled={savingId === loc.id} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }} title="取消"><X size={18} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <strong style={{ fontSize: '1rem' }}>{loc.name}</strong>
+                      <button 
+                        onClick={() => { setEditingId(loc.id); setEditName(loc.name); }} 
+                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }} 
+                        title="編輯名稱"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                    </>
+                  )}
                 </div>
                 {loc.id !== 'LINE_LIFF' && (
                   <button
