@@ -203,9 +203,6 @@ export default function ScanPage() {
       {pageState === 'EMPTY' && (
         <div className={styles.emptyContainer}>
           <div className={styles.emptyIcon}>🍵</div>
-          <h1 className={styles.emptyTitle}>
-            {locationInfo?.locationName || ''}
-          </h1>
           <p className={styles.emptySubtitle}>
             {emptyMessage}
           </p>
