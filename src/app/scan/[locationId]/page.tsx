@@ -84,7 +84,7 @@ export default function ScanPage() {
             const savedResult = localStorage.getItem(`result_campaign_${campaignKey}`);
             if (savedResult) {
               setResult(JSON.parse(savedResult));
-              setPageState('RESULT');
+              setPageState('REVEAL');
               return;
             }
             setPageState('BLOCKED');
